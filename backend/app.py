@@ -27,13 +27,15 @@ SCHEMA_PATH = os.path.join(BASE_DIR, 'schema.sql')
 import logging
 
 # Configure logging for auth diagnostics
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("auth")
+from typing import Optional, Dict
 
 def generate_token(payload: dict) -> str:
     return token_serializer.dumps(payload)
 
-def verify_token(token: str, max_age_seconds: int = 60 * 60 * 8) -> dict | None:
+def verify_token(token: str, max_age_seconds: int = 60 * 60 * 8) -> Optional[Dict]:
     try:
         data = token_serializer.loads(token, max_age=max_age_seconds)
         return data
