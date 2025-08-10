@@ -1,0 +1,52 @@
+@use '../../styles/_theme' as *;
+
+.employees-page {
+  @include container;
+
+  .page-card {
+    @include glass();
+    padding: $space-6;
+  }
+
+  .page-header {
+    margin-bottom: $space-4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .p-toolbar {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-bottom: $space-4;
+
+    .p-toolbar-group-left,
+    .p-toolbar-group-right {
+      gap: $space-4;
+    }
+  }
+
+  .p-datatable {
+    .p-datatable-header {
+      background: transparent;
+      border: none;
+      padding-left: 0;
+      padding-right: 0;
+      margin-bottom: $space-4;
+    }
+    .p-datatable-thead > tr > th {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur($blur-sm);
+    }
+    .p-datatable-tbody > tr > td {
+      background: rgba(255,255,255,0.55);
+    }
+  }
+
+  .p-dialog {
+    .p-dialog-content {
+      @include glass($surface, $blur-lg);
+    }
+  }
+}

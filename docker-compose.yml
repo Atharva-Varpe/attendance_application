@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: chimes4life/attendance-frontend:latest
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    image: chimes4life/attendance-backend:latest
+    build: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - backend-data:/data
+    environment:
+      - SECRET_KEY=your-production-secret
+    networks:
+      - app-network
+
+volumes:
+  backend-data:
+
+networks:
+  app-network:
+    driver: bridge

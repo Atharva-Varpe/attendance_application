@@ -1,0 +1,31 @@
+@use '../../styles/_theme' as *;
+
+.admin-page {
+  @include container;
+
+  .page-card {
+    @include glass();
+    padding: $space-6;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-4;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .metric {
+      .p-card {
+        background: transparent;
+        border: none;
+
+        .p-card-body {
+          @include glass();
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+@use '../../styles/_theme' as *;
+
+.attendance-page {
+  @include container;
+
+  .page-card {
+    @include glass();
+    padding: $space-6;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $space-4;
+    margin-bottom: $space-4;
+
+    @media (min-width: 768px) {
+      grid-template-columns: 2fr 1fr;
+      align-items: end;
+    }
+
+    .selector {
+      label {
+        display: block;
+        margin-bottom: $space-2;
+        color: $text-700;
+      }
+    }
+
+    .actions {
+      display: flex;
+      gap: $space-3;
+      justify-content: flex-start;
+
+      @media (min-width: 768px) {
+        justify-content: flex-end;
+      }
+    }
+  }
+
+  .timeline-wrap {
+    margin-top: $space-4;
+
+    .p-timeline {
+      .p-timeline-event-content, .p-timeline-event-opposite {
+        background: rgba(255,255,255,0.6);
+        backdrop-filter: blur($blur-sm);
+        padding: $space-3 $space-4;
+        border-radius: 12px;
+      }
+    }
+  }
+}

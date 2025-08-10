@@ -1,0 +1,90 @@
+// Global app background and base element overrides
+@use './_theme' as *;
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: $text-900;
+  // Gradient background
+  @include gradient-bg();
+  background-attachment: fixed;
+}
+
+/* Override gradient with a global background image across the app */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-image: url('/background.jpg'); /* served from frontend/public */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+// Menubar and footer subtle transparency
+.p-menubar {
+  @include glass($surface-strong, $blur-sm);
+  margin: $space-4;
+  border-radius: $radius-md;
+}
+
+main.app-main {
+  flex: 1;
+  padding: $space-6;
+  @include container;
+  background: transparent; // ensure content area does not override bg
+}
+
+footer.app-footer {
+  margin: $space-4;
+  @include glass($surface, $blur-sm);
+  text-align: center;
+  padding: $space-4;
+  color: $text-700;
+}
+
+// Generic glass card helper to use on pages
+.glass-card {
+  @include glass();
+  padding: $space-6;
+}
+
+// PrimeReact card override for glass look
+.p-card {
+  background: transparent;
+  border: none;
+  .p-card-body {
+    @include glass();
+  }
+  .p-card-title {
+    color: $text-900;
+  }
+  .p-card-subtitle {
+    color: $text-700;
+  }
+}
+
+// Inputs and dialogs subtle transparency
+.p-inputtext, .p-password-input {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 10px;
+}
+
+.p-dialog {
+  .p-dialog-content {
+    @include glass($surface, $blur-lg);
+  }
+  .p-dialog-header {
+    background: transparent;
+    border: none;
+  }
+}
+
+// Utility spacing
+.mt-6 { margin-top: $space-6; }
+.mb-6 { margin-bottom: $space-6; }
+.mx-4 { margin-left: $space-4; margin-right: $space-4; }

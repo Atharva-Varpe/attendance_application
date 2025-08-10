@@ -1,0 +1,76 @@
+// Global SCSS theme, variables, and mixins
+
+// Color palette
+$primary: #4f46e5; // indigo-600
+$primary-700: #4338ca;
+$accent: #22d3ee; // cyan-400
+$surface: rgba(255, 255, 255, 0.75);
+$surface-strong: rgba(255, 255, 255, 0.9);
+$border: rgba(255, 255, 255, 0.35);
+$text-900: #0f172a; // slate-900
+$text-700: #334155; // slate-700
+$text-600: #475569; // slate-600
+
+// Shadows
+$shadow-1: 0 6px 24px rgba(2, 6, 23, 0.06);
+$shadow-2: 0 12px 48px rgba(2, 6, 23, 0.12);
+
+// Blur levels
+$blur-sm: 8px;
+$blur-md: 12px;
+$blur-lg: 18px;
+
+// Radii
+$radius-md: 14px;
+$radius-lg: 18px;
+
+// Spacing scale
+$space-1: 0.25rem;
+$space-2: 0.5rem;
+$space-3: 0.75rem;
+$space-4: 1rem;
+$space-5: 1.25rem;
+$space-6: 1.5rem;
+$space-8: 2rem;
+
+// Mixins
+@mixin glass($bg: $surface, $blur: $blur-md, $borderColor: $border, $shadow: $shadow-1) {
+  background: $bg;
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+  border: 1px solid $borderColor;
+  box-shadow: $shadow;
+  border-radius: $radius-md;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $space-6;
+}
+
+@mixin gradient-bg($angle: 135deg) {
+  // Soft, subtle gradient with accent glow
+  background:
+    radial-gradient(1200px circle at 0% 0%, rgba($accent, 0.18), transparent 40%),
+    radial-gradient(1000px circle at 100% 100%, rgba($primary, 0.18), transparent 40%),
+    linear-gradient($angle, #0ea5e9 0%, #6366f1 50%, #7c3aed 100%);
+}
+
+:root {
+  --text-600: #6b7280;
+  --text-700: #374151;
+}
+
+// Utility classes
+.shadow-1 { box-shadow: $shadow-1; }
+.shadow-2 { box-shadow: $shadow-2; }
+.text-600 { color: var(--text-600); }
+.text-700 { color: var(--text-700); }
+.w-full { width: 100%; }

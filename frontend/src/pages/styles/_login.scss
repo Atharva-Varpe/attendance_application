@@ -1,0 +1,33 @@
+@use '../../styles/_theme' as *;
+
+.login-page {
+  @include container;
+  @include flex-center;
+  min-height: calc(100vh - 160px);
+
+  .login-card {
+    max-width: 460px;
+    width: 92vw;
+
+    .p-card-body {
+      padding: $space-6;
+      @include glass($surface, $blur-lg);
+    }
+
+    .p-inputtext,
+    .p-password-input {
+      background: rgba(255, 255, 255, 0.92);
+    }
+  }
+
+  .login-title {
+    font-weight: 700;
+    color: $text-900;
+    font-size: 1.25rem;
+  }
+
+  .login-subtitle {
+    color: $text-700;
+    font-size: 0.95rem;
+  }
+}
