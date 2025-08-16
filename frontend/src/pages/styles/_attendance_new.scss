@@ -1,7 +1,7 @@
 @use '../../styles/_theme' as *;
 
 .attendance-page {
-  @include full-width-container;
+  @include container(1400px);
 
   .page-header {
     @include page-header;
@@ -22,18 +22,14 @@
     grid-template-columns: 1fr;
     margin-bottom: $space-8;
     
-    @media (min-width: 1200px) {
-      grid-template-columns: 1fr 350px;
+    @media (min-width: 1024px) {
+      grid-template-columns: 1fr 300px;
     }
   }
 
   .attendance-main {
     @include card($shadow-lg);
-    padding: $space-6;
-    
-    @media (max-width: 768px) {
-      padding: $space-4;
-    }
+    padding: $space-8;
     
     .section-title {
       font-size: 1.25rem;

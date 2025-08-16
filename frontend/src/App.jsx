@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
 import { PrimeReactProvider } from 'primereact/api';
 import { Menubar } from 'primereact/menubar';
@@ -9,10 +9,13 @@ import { Menu } from 'primereact/menu';
 
 import AuthProvider from './context/AuthContext.jsx';
 import { useAuth } from './context/useAuth.js';
-import LoginPage from './pages/LoginPage.jsx';
-import EmployeesPage from './pages/EmployeesPage.jsx';
-import AttendancePage from './pages/AttendancePage.jsx';
-import AdminDashboard from './pages/AdminDashboard.jsx';
+
+// Lazy load pages
+const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
+const EmployeesPage = lazy(() => import('./pages/EmployeesPage.jsx'));
+const AttendancePage = lazy(() => import('./pages/AttendancePage.jsx'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard.jsx'));
+const Dashboard = lazy(() => import('./pages/Dashboard.tsx'));
 
 // Salary page (employees can view their own salary)
 function SalaryPage() {
@@ -25,38 +28,38 @@ function SalaryPage() {
 
   return (
     <div className="p-3">
-      <h2>Salary</h2>
+      <h2 style={{ color: '#2a2a2a', fontWeight: 600, marginBottom: '1.5rem' }}>Salary</h2>
       {!record ? (
         <p className="text-600">No salary data for this account.</p>
       ) : (
-        <div className="grid">
+        <div className="grid" style={{ gap: '2rem' }}>
           <div className="col-12 md:col-4">
-            <div className="p-card p-component">
+            <div className="p-card p-component" style={{ minWidth: 260 }}>
               <div className="p-card-body">
-                <div className="p-card-title">Summary</div>
+                <div className="p-card-title" style={{ fontSize: '1.15rem', fontWeight: 500 }}>Summary</div>
                 <div className="p-mt-3">
                   <div className="p-d-flex p-jc-between p-my-2"><span>Base</span><strong>{record.base.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</strong></div>
                   <div className="p-d-flex p-jc-between p-my-2"><span>Allowances</span><strong>{record.allowances.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</strong></div>
                   <div className="p-d-flex p-jc-between p-my-2"><span>Deductions</span><strong>{record.deductions.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</strong></div>
-                  <div className="p-d-flex p-jc-between p-my-2"><span>Net</span><strong>{record.net.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</strong></div>
+                  <div className="p-d-flex p-jc-between p-my-2"><span>Net</span><strong style={{ color: '#4f46e5' }}>{record.net.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</strong></div>
                 </div>
               </div>
             </div>
           </div>
           <div className="col-12 md:col-8">
-            <div className="p-card p-component">
+            <div className="p-card p-component" style={{ overflowX: 'auto' }}>
               <div className="p-card-body">
-                <div className="p-card-title">Recent Payslips</div>
+                <div className="p-card-title" style={{ fontSize: '1.15rem', fontWeight: 500 }}>Recent Payslips</div>
                 <div className="p-mt-3">
-                  <table className="p-datatable-table" style={{ width: '100%' }}>
+                  <table className="p-datatable-table" style={{ width: '100%', tableLayout: 'fixed', wordBreak: 'break-word' }}>
                     <thead>
                       <tr>
-                        <th className="p-2 text-700">Month</th>
-                        <th className="p-2 text-700">Base</th>
-                        <th className="p-2 text-700">Allowances</th>
-                        <th className="p-2 text-700">Deductions</th>
-                        <th className="p-2 text-700">Net</th>
-                        <th className="p-2 text-700">Paid On</th>
+                        <th className="p-2 text-700" style={{ minWidth: 80 }}>Month</th>
+                        <th className="p-2 text-700" style={{ minWidth: 100 }}>Base</th>
+                        <th className="p-2 text-700" style={{ minWidth: 100 }}>Allowances</th>
+                        <th className="p-2 text-700" style={{ minWidth: 100 }}>Deductions</th>
+                        <th className="p-2 text-700" style={{ minWidth: 100 }}>Net</th>
+                        <th className="p-2 text-700" style={{ minWidth: 120 }}>Paid On</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -66,8 +69,8 @@ function SalaryPage() {
                           <td className="p-2">{p.base.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</td>
                           <td className="p-2">{p.allowances.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</td>
                           <td className="p-2">{p.deductions.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</td>
-                          <td className="p-2"><strong>{p.net.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</strong></td>
-                          <td className="p-2">{p.paidOn}</td>
+                          <td className="p-2"><strong style={{ color: '#4f46e5' }}>{p.net.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</strong></td>
+                          <td className="p-2" style={{ wordBreak: 'break-word' }}>{p.paidOn}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -198,13 +201,38 @@ function Layout() {
 
   // Left menu with top-level navigation
   const items = [
-    { label: 'Dashboard', icon: 'pi pi-home', command: () => navigate('/dashboard') },
-    { label: 'Attendance', icon: 'pi pi-calendar', command: () => navigate('/attendance') },
-    { label: 'Salary', icon: 'pi pi-wallet', command: () => navigate('/salary') },
+    { 
+      label: 'Dashboard', 
+      icon: 'pi pi-home', 
+      command: () => navigate('/dashboard'),
+      className: location.pathname === '/dashboard' ? 'active-menu-item' : ''
+    },
+    { 
+      label: 'Attendance', 
+      icon: 'pi pi-calendar', 
+      command: () => navigate('/attendance'),
+      className: location.pathname === '/attendance' ? 'active-menu-item' : ''
+    },
+    { 
+      label: 'Salary', 
+      icon: 'pi pi-wallet', 
+      command: () => navigate('/salary'),
+      className: location.pathname === '/salary' ? 'active-menu-item' : ''
+    },
     ...(user?.role?.toLowerCase() === 'admin'
       ? [
-          { label: 'Employees', icon: 'pi pi-users', command: () => navigate('/employees') },
-          { label: 'Admin', icon: 'pi pi-cog', command: () => navigate('/admin') },
+          { 
+            label: 'Employees', 
+            icon: 'pi pi-users', 
+            command: () => navigate('/employees'),
+            className: location.pathname === '/employees' ? 'active-menu-item' : ''
+          },
+          { 
+            label: 'Admin', 
+            icon: 'pi pi-cog', 
+            command: () => navigate('/admin'),
+            className: location.pathname === '/admin' ? 'active-menu-item' : ''
+          },
         ]
       : []),
   ];
@@ -228,121 +256,106 @@ function Layout() {
   ];
 
   const start = (
-    <Link to="/dashboard" className="p-menubar-button p-button-text" style={{ textDecoration: 'none' }}>
-      <span className="pi pi-briefcase p-mr-2" />
-      <span className="p-text-bold">HR Suite</span>
+    <Link to="/dashboard" className="company-logo">
+      <img src="/logo.jpg" alt="Logo" style={{ height: 'auto', width: 'auto', maxHeight: '80px' }} />
     </Link>
   );
 
   const end = user ? (
-    <div className="p-d-flex p-ai-center p-gap-2">
-      <span className="p-text-600" style={{ display: 'none' }}>{user.name || user.email}</span>
+    <div className="user-info">
+      <div className="user-details">
+        <div className="user-name">{user.name || user.email}</div>
+        <div className="user-role">{user.role || 'Employee'}</div>
+      </div>
       <Menu model={profileItems} popup ref={profileMenuRef} id="profile_menu" />
-      <Button text rounded
+      <Button 
+        text 
+        rounded
+        className="user-menu-button"
         aria-haspopup
         aria-controls="profile_menu"
         onClick={(e) => profileMenuRef.current?.toggle(e)}
-        icon={<Avatar icon="pi pi-user" size="small" shape="circle" />}
-      />
+      >
+        <Avatar icon="pi pi-user" size="normal" shape="circle" />
+      </Button>
     </div>
   ) : (
     <Link to="/login">
-      <Button label="Login" icon="pi pi-sign-in" />
+      <Button label="Sign In" icon="pi pi-sign-in" className="p-button-outlined" />
     </Link>
   );
 
   return (
-    <div className="app-shell" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="app-shell">
       <Toast ref={toastRef} />
-      <Menubar model={items} start={start} end={end} className="shadow-1" />
-      <main
-        className="app-main"
-        style={{
-          flex: 1,
-          display: 'flex',
-          justifyContent: 'center',
-          padding: '1.5rem'
-        }}
-      >
-        <div
-          className="app-container"
-          style={{
-            width: '100%',
-            maxWidth: 1280,
-          }}
-        >
+      <Menubar model={items} start={start} end={end} />
+      
+      <main className="app-main">
+        <Suspense fallback={<div>Loading...</div>}>
           <Routes location={location}>
-          <Route path="/" element={<ProtectedRoute><Navigate to="/dashboard" replace /></ProtectedRoute>} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <div className="container-fluid">
+            <Route path="/" element={<ProtectedRoute><Navigate to="/dashboard" replace /></ProtectedRoute>} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
                   <Dashboard />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          {/* Admin can access Employees; employees cannot */}
-          <Route
-            path="/employees"
-            element={
-              <AdminRoute>
-                <div className="container-fluid">
+                </ProtectedRoute>
+              }
+            />
+            {/* Admin can access Employees; employees cannot */}
+            <Route
+              path="/employees"
+              element={
+                <AdminRoute>
                   <EmployeesPage />
-                </div>
-              </AdminRoute>
-            }
-          />
-          {/* Attendance is employee display-only route */}
-          <Route
-            path="/attendance"
-            element={
-              <ProtectedRoute>
-                <div className="container-fluid">
+                </AdminRoute>
+              }
+            />
+            {/* Attendance is employee display-only route */}
+            <Route
+              path="/attendance"
+              element={
+                <ProtectedRoute>
                   <AttendancePage />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          {/* Salary and Profile accessible to authenticated users; per-page will restrict viewing to self */}
-          <Route
-            path="/salary"
-            element={
-              <ProtectedRoute>
-                <div className="container-fluid">
+                </ProtectedRoute>
+              }
+            />
+            {/* Salary and Profile accessible to authenticated users; per-page will restrict viewing to self */}
+            <Route
+              path="/salary"
+              element={
+                <ProtectedRoute>
                   <SalaryPage />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <div className="container-fluid">
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
                   <ProfilePage />
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          {/* Admin tools page */}
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <div className="container-fluid">
+                </ProtectedRoute>
+              }
+            />
+            {/* Admin tools page */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
                   <AdminDashboard />
-                </div>
-              </AdminRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        </div>
+                </AdminRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </main>
-      <footer className="app-footer text-600" style={{ padding: '0.75rem 1.5rem' }}>© {new Date().getFullYear()} HR Suite</footer>
+      
+      <footer className="app-footer">
+        <div>© {new Date().getFullYear()} AttendanceHub. All rights reserved.</div>
+        <div>Professional HR Management System</div>
+      </footer>
     </div>
   );
 }
@@ -358,172 +371,6 @@ function AdminRoute({ children }) {
   if (!token) return <Navigate to="/login" replace />;
   if (user?.role?.toLowerCase() !== 'admin') return <Navigate to="/dashboard" replace />;
   return children;
-}
-
-// Summary Dashboard using seeded data
-function Dashboard() {
-  const { user, data } = useAuth();
-
-  const [loading, setLoading] = React.useState(true);
-  const [presentToday, setPresentToday] = React.useState(0);
-  const [absentToday, setAbsentToday] = React.useState(0);
-  const [recent, setRecent] = React.useState([]);
-
-  React.useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      const employees = data.getEmployees();
-      const today = new Date().toISOString().slice(0, 10);
-      let present = 0, absent = 0;
-      const recentRows = [];
-      for (const e of employees) {
-        const list = data.getAttendanceByEmployee(e.id);
-        const todayRec = list.find(r => r.date === today);
-        if (todayRec?.status === 'Present' || todayRec?.status === 'Late') present++;
-        else absent++;
-        const last = list.slice(-1)[0];
-        if (last) recentRows.push({ ...last, name: e.name, id: e.id });
-      }
-      recentRows.sort((a, b) => (a.date < b.date ? 1 : -1));
-      setPresentToday(present);
-      setAbsentToday(absent);
-      setRecent(recentRows.slice(0, 5));
-      setLoading(false);
-    }, 200);
-  }, [data]);
-
-  const countCard = (title, value, icon) => (
-    <div className="col-12 md:col-4">
-      <div className="p-card p-component shadow-1" style={{ borderRadius: 14 }}>
-        <div className="p-card-body">
-          <div className="p-d-flex p-jc-between p-ai-center">
-            <div>
-              <div className="p-card-title" style={{ fontSize: 18 }}>{title}</div>
-              <div className="p-card-subtitle">Today</div>
-            </div>
-            <span className={`pi ${icon}`} style={{ fontSize: 30 }} />
-          </div>
-          <div className="p-mt-3" style={{ fontSize: 34, fontWeight: 800 }}>{value}</div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const tagSeverity = (s) => s === 'Present' ? 'success' : s === 'Late' ? 'warning' : s === 'Leave' ? 'info' : s === 'Absent' ? 'danger' : 'secondary';
-  const t = (iso) => (iso ? new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-');
-
-  return (
-    <div className="p-0">
-      <div
-        className="p-3"
-        style={{
-          background: 'linear-gradient(135deg, rgba(79,70,229,0.08), rgba(14,165,233,0.08))',
-          borderRadius: 12,
-          marginBottom: '1rem'
-        }}
-      >
-        <div className="p-d-flex p-jc-between p-ai-center p-flex-wrap" style={{ gap: '0.75rem' }}>
-          <div>
-            <h2 style={{ margin: 0 }}>Dashboard</h2>
-            <div className="text-600">Overview and recent activity</div>
-          </div>
-          <div className="p-d-flex p-gap-2">
-            <Link to="/attendance" className="p-button p-button-outlined"><span className="pi pi-calendar p-mr-2" />Attendance</Link>
-            <Link to="/employees" className="p-button p-button-outlined"><span className="pi pi-users p-mr-2" />Employees</Link>
-          </div>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="grid">
-          <div className="col-12 md:col-4"><div className="p-skeleton p-component" style={{ height: 180 }} /></div>
-          <div className="col-12 md:col-4"><div className="p-skeleton p-component" style={{ height: 180 }} /></div>
-          <div className="col-12 md:col-4"><div className="p-skeleton p-component" style={{ height: 180 }} /></div>
-        </div>
-      ) : (
-        <>
-          <div className="grid">
-            {countCard('Total Employees', data.getEmployees().length, 'pi-users')}
-            {countCard('Present Today', presentToday, 'pi-user-check')}
-            {countCard('Absent Today', absentToday, 'pi-user-times')}
-          </div>
-
-          <div className="grid mt-6">
-            <div className="col-12 lg:col-7">
-              <div className="p-card p-component" style={{ borderRadius: 14 }}>
-                <div className="p-card-body">
-                  <div className="p-d-flex p-jc-between p-ai-center">
-                    <div>
-                      <div className="p-card-title" style={{ marginBottom: 4 }}>Recent Attendance</div>
-                      <div className="p-card-subtitle">Latest updates</div>
-                    </div>
-                    <Link to="/attendance" className="p-button p-button-text">
-                      <span className="pi pi-external-link p-mr-2" /> View all
-                    </Link>
-                  </div>
-                  <div className="p-mt-3">
-                    <table className="p-datatable-table" style={{ width: '100%' }}>
-                      <thead>
-                        <tr>
-                          <th className="p-3 text-700">Employee</th>
-                          <th className="p-3 text-700">Date</th>
-                          <th className="p-3 text-700">Status</th>
-                          <th className="p-3 text-700">In</th>
-                          <th className="p-3 text-700">Out</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {recent.map((r, i) => (
-                          <tr key={i} className="p-selectable-row">
-                            <td className="p-3">{r.name}</td>
-                            <td className="p-3">{r.date}</td>
-                            <td className="p-3"><span className={`p-tag p-tag-${tagSeverity(r.status)}`}>{r.status}</span></td>
-                            <td className="p-3">{t(r.checkIn)}</td>
-                            <td className="p-3">{t(r.checkOut)}</td>
-                          </tr>
-                        ))}
-                        {recent.length === 0 ? (
-                          <tr><td colSpan={5} className="p-4 p-text-secondary">No recent entries</td></tr>
-                        ) : null}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 lg:col-5">
-              <div className="p-card p-component" style={{ borderRadius: 14, height: '100%' }}>
-                <div className="p-card-body">
-                  <div className="p-card-title" style={{ marginBottom: 4 }}>Today’s Summary</div>
-                  <div className="p-card-subtitle">Quick glance</div>
-                  <div className="grid p-mt-3">
-                    <div className="col-12 sm:col-6">
-                      <div className="p-3 shadow-1" style={{ borderRadius: 12 }}>
-                        <div className="text-700">Present</div>
-                        <div style={{ fontSize: 28, fontWeight: 700 }}>{presentToday}</div>
-                      </div>
-                    </div>
-                    <div className="col-12 sm:col-6">
-                      <div className="p-3 shadow-1" style={{ borderRadius: 12 }}>
-                        <div className="text-700">Absent</div>
-                        <div style={{ fontSize: 28, fontWeight: 700 }}>{absentToday}</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-mt-3">
-                    <Link to="/employees" className="p-button p-button-sm p-button-text">
-                      Manage Employees <span className="pi pi-arrow-right p-ml-2" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
 }
 
 export default function App() {

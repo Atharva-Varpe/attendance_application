@@ -1,33 +1,151 @@
 @use '../../styles/_theme' as *;
 
 .login-page {
-  @include container;
+  @include container();
   @include flex-center;
-  min-height: calc(100vh - 160px);
+  
+  & {
+    min-height: calc(100vh - 160px);
+    padding: $space-8;
+  }
 
   .login-card {
-    max-width: 460px;
-    width: 92vw;
+    max-width: 480px;
+    width: 100%;
+    @include card($shadow-2xl);
+    border: 1px solid $border-strong;
+    
+    .p-card-header {
+      text-align: center;
+      background: linear-gradient(135deg, $primary-600, $primary-700);
+      color: white;
+      margin: -1px -1px 0 -1px;
+      border-radius: $radius-lg $radius-lg 0 0;
+      padding: $space-8 $space-6 $space-6;
+      
+      .login-title {
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: $space-2;
+        letter-spacing: -0.025em;
+      }
+      
+      .login-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        font-weight: 400;
+      }
+    }
 
     .p-card-body {
-      padding: $space-6;
-      @include glass($surface, $blur-lg);
+      padding: $space-8;
+      background: $surface-card;
+      border-radius: 0 0 $radius-lg $radius-lg;
     }
 
-    .p-inputtext,
-    .p-password-input {
-      background: rgba(255, 255, 255, 0.92);
+    .login-form {
+      .p-field {
+        margin-bottom: $space-6;
+        
+        label {
+          display: block;
+          font-weight: 600;
+          color: $text-700;
+          margin-bottom: $space-2;
+          font-size: 0.875rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        
+        .p-inputtext, .p-password-input {
+          width: 100%;
+          font-size: 1rem;
+          padding: $space-4;
+          border: 2px solid $border;
+          border-radius: $radius-md;
+          transition: all 0.3s ease;
+          
+          &:focus {
+            border-color: $primary-400;
+            box-shadow: 0 0 0 3px rgba($primary-600, 0.1);
+          }
+        }
+        
+        .p-password {
+          width: 100%;
+        }
+        
+        small {
+          display: block;
+          margin-top: $space-2;
+          color: $text-500;
+          font-size: 0.8rem;
+          line-height: 1.4;
+        }
+      }
+      
+      .error-message {
+        margin-bottom: $space-4;
+        
+        .p-message {
+          border-radius: $radius-md;
+          border-left: 4px solid $error;
+        }
+      }
+      
+      .login-button {
+        width: 100%;
+        padding: $space-4;
+        font-size: 1.1rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, $primary-600, $primary-700);
+        border: none;
+        border-radius: $radius-md;
+        transition: all 0.3s ease;
+        
+        &:hover:not(:disabled) {
+          background: linear-gradient(135deg, $primary-700, $primary-800);
+          transform: translateY(-1px);
+          box-shadow: $shadow-lg;
+        }
+        
+        &:active:not(:disabled) {
+          transform: translateY(0);
+        }
+        
+        &:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+      }
     }
   }
 
-  .login-title {
-    font-weight: 700;
-    color: $text-900;
-    font-size: 1.25rem;
-  }
-
-  .login-subtitle {
-    color: $text-700;
-    font-size: 0.95rem;
+  // Professional demo credentials section
+  .demo-credentials {
+    margin-top: $space-6;
+    padding: $space-4;
+    background: $primary-50;
+    border: 1px solid $primary-200;
+    border-radius: $radius-md;
+    
+    .demo-title {
+      font-weight: 600;
+      color: $primary-800;
+      margin-bottom: $space-2;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .demo-item {
+      font-size: 0.875rem;
+      color: $primary-700;
+      margin: $space-1 0;
+      
+      strong {
+        color: $primary-800;
+      }
+    }
   }
 }

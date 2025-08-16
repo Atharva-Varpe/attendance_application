@@ -1,46 +1,110 @@
+@use 'sass:color';
+
 // Global SCSS theme, variables, and mixins
 
-// Color palette
-$primary: #4f46e5; // indigo-600
-$primary-700: #4338ca;
-$accent: #22d3ee; // cyan-400
-$surface: rgba(255, 255, 255, 0.75);
-$surface-strong: rgba(255, 255, 255, 0.9);
-$border: rgba(255, 255, 255, 0.35);
+// Enhanced color palette for professional look
+$primary: #2563eb; // blue-600 - more professional than indigo
+$primary-50: #eff6ff;
+$primary-100: #dbeafe;
+$primary-200: #bfdbfe;
+$primary-300: #93c5fd;
+$primary-400: #60a5fa;
+$primary-500: #3b82f6;
+$primary-600: #2563eb;
+$primary-700: #1d4ed8;
+$primary-800: #1e40af;
+$primary-900: #1e3a8a;
+
+$secondary: #64748b; // slate-500
+$accent: #0ea5e9; // sky-500 - more professional accent
+$success: #10b981; // emerald-500
+$warning: #f59e0b; // amber-500
+$error: #ef4444; // red-500
+
+// Professional surface colors
+$surface: rgba(255, 255, 255, 0.85);
+$surface-strong: rgba(255, 255, 255, 0.95);
+$surface-card: #ffffff;
+$surface-ground: #f8fafc;
+$border: rgba(226, 232, 240, 0.6); // slate-200 with opacity
+$border-strong: #e2e8f0;
+
+// Professional text hierarchy
 $text-900: #0f172a; // slate-900
+$text-800: #1e293b; // slate-800
 $text-700: #334155; // slate-700
 $text-600: #475569; // slate-600
+$text-500: #64748b; // slate-500
+$text-400: #94a3b8; // slate-400
+$text-300: #cbd5e1; // slate-300
 
-// Shadows
-$shadow-1: 0 6px 24px rgba(2, 6, 23, 0.06);
-$shadow-2: 0 12px 48px rgba(2, 6, 23, 0.12);
+// Professional shadows with multiple variations
+$shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+$shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 
-// Blur levels
-$blur-sm: 8px;
+// Enhanced blur levels
+$blur-xs: 4px;
+$blur-sm: 6px;
 $blur-md: 12px;
-$blur-lg: 18px;
+$blur-lg: 16px;
+$blur-xl: 24px;
 
-// Radii
-$radius-md: 14px;
-$radius-lg: 18px;
+// Professional border radius
+$radius-xs: 4px;
+$radius-sm: 6px;
+$radius-md: 8px;
+$radius-lg: 12px;
+$radius-xl: 16px;
+$radius-2xl: 24px;
 
-// Spacing scale
+// Enhanced spacing scale
+$space-px: 1px;
+$space-0-5: 0.125rem;
 $space-1: 0.25rem;
+$space-1-5: 0.375rem;
 $space-2: 0.5rem;
+$space-2-5: 0.625rem;
 $space-3: 0.75rem;
+$space-3-5: 0.875rem;
 $space-4: 1rem;
 $space-5: 1.25rem;
 $space-6: 1.5rem;
+$space-7: 1.75rem;
 $space-8: 2rem;
+$space-9: 2.25rem;
+$space-10: 2.5rem;
+$space-11: 2.75rem;
+$space-12: 3rem;
+$space-14: 3.5rem;
+$space-16: 4rem;
+$space-20: 5rem;
+$space-24: 6rem;
 
-// Mixins
-@mixin glass($bg: $surface, $blur: $blur-md, $borderColor: $border, $shadow: $shadow-1) {
+// Enhanced mixins for professional UI
+@mixin glass($bg: $surface, $blur: $blur-md, $borderColor: $border, $shadow: $shadow-lg) {
   background: $bg;
   backdrop-filter: blur($blur);
   -webkit-backdrop-filter: blur($blur);
   border: 1px solid $borderColor;
   box-shadow: $shadow;
-  border-radius: $radius-md;
+  border-radius: $radius-lg;
+}
+
+@mixin card($shadow: $shadow-sm, $bg: $surface-card, $border: $border-strong) {
+  background: $bg;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow;
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-1px);
+  }
 }
 
 @mixin flex-center {
@@ -49,28 +113,148 @@ $space-8: 2rem;
   justify-content: center;
 }
 
-@mixin container {
-  max-width: 1200px;
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin container($max-width: 1200px) {
+  max-width: $max-width;
   margin: 0 auto;
   padding: $space-6;
+  
+  @media (max-width: 768px) {
+    padding: $space-4;
+  }
+}
+
+@mixin full-width-container {
+  width: 100%;
+  padding: $space-6;
+  
+  @media (max-width: 768px) {
+    padding: $space-4;
+  }
+}
+
+@mixin page-header {
+  margin-bottom: $space-8;
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: $text-900;
+    margin: 0 0 $space-2 0;
+    letter-spacing: -0.025em;
+  }
+  
+  p {
+    color: $text-600;
+    font-size: 1.125rem;
+    margin: 0;
+  }
+}
+
+@mixin button-primary {
+  background: linear-gradient(135deg, $primary-600, $primary-700);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: $space-3 $space-6;
+  border-radius: $radius-md;
+  transition: all 0.2s ease-in-out;
+  box-shadow: $shadow-sm;
+  
+  &:hover {
+    background: linear-gradient(135deg, $primary-700, $primary-800);
+    box-shadow: $shadow-md;
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+    box-shadow: $shadow-sm;
+  }
 }
 
 @mixin gradient-bg($angle: 135deg) {
-  // Soft, subtle gradient with accent glow
   background:
-    radial-gradient(1200px circle at 0% 0%, rgba($accent, 0.18), transparent 40%),
-    radial-gradient(1000px circle at 100% 100%, rgba($primary, 0.18), transparent 40%),
-    linear-gradient($angle, #0ea5e9 0%, #6366f1 50%, #7c3aed 100%);
+    radial-gradient(1200px circle at 10% 20%, rgba($primary-100, 0.3), transparent 50%),
+    radial-gradient(1000px circle at 90% 80%, rgba($accent, 0.1), transparent 50%),
+    linear-gradient($angle, $surface-ground 0%, #f1f5f9 50%, $primary-50 100%);
 }
 
+// CSS Custom Properties for PrimeReact theming
 :root {
-  --text-600: #6b7280;
-  --text-700: #374151;
+  // Primary colors
+  --primary-color: #{$primary-600};
+  --primary-color-text: #ffffff;
+  
+  // Surface colors
+  --surface-ground: #{$surface-ground};
+  --surface-section: #{$surface-card};
+  --surface-card: #{$surface-card};
+  --surface-overlay: #{$surface-strong};
+  --surface-border: #{$border-strong};
+  
+  // Text colors
+  --text-color: #{$text-800};
+  --text-color-secondary: #{$text-600};
+  --text-600: #{$text-600};
+  --text-700: #{$text-700};
+  --text-800: #{$text-800};
+  --text-900: #{$text-900};
+  
+  // Component specific
+  --border-radius: #{$radius-md};
+  --focus-ring: 0 0 0 2px #{rgba($primary-600, 0.2)};
 }
 
-// Utility classes
-.shadow-1 { box-shadow: $shadow-1; }
-.shadow-2 { box-shadow: $shadow-2; }
-.text-600 { color: var(--text-600); }
-.text-700 { color: var(--text-700); }
+// Enhanced utility classes
+.shadow-xs { box-shadow: $shadow-xs; }
+.shadow-sm { box-shadow: $shadow-sm; }
+.shadow-md { box-shadow: $shadow-md; }
+.shadow-lg { box-shadow: $shadow-lg; }
+.shadow-xl { box-shadow: $shadow-xl; }
+.shadow-2xl { box-shadow: $shadow-2xl; }
+
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.875rem; }
+.text-base { font-size: 1rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+.text-3xl { font-size: 1.875rem; }
+
+.text-400 { color: $text-400; }
+.text-500 { color: $text-500; }
+.text-600 { color: $text-600; }
+.text-700 { color: $text-700; }
+.text-800 { color: $text-800; }
+.text-900 { color: $text-900; }
+
 .w-full { width: 100%; }
+.h-full { height: 100%; }
+
+// Spacing utilities
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: $space-1; }
+.mt-2 { margin-top: $space-2; }
+.mt-3 { margin-top: $space-3; }
+.mt-4 { margin-top: $space-4; }
+.mt-6 { margin-top: $space-6; }
+.mt-8 { margin-top: $space-8; }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: $space-1; }
+.mb-2 { margin-bottom: $space-2; }
+.mb-3 { margin-bottom: $space-3; }
+.mb-4 { margin-bottom: $space-4; }
+.mb-6 { margin-bottom: $space-6; }
+.mb-8 { margin-bottom: $space-8; }
+
+.mx-auto { margin-left: auto; margin-right: auto; }
+.px-4 { padding-left: $space-4; padding-right: $space-4; }
+.py-2 { padding-top: $space-2; padding-bottom: $space-2; }
+.py-4 { padding-top: $space-4; padding-bottom: $space-4; }

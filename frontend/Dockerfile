@@ -2,7 +2,9 @@
 FROM node:18 as builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+COPY index.html ./
+COPY src ./src
+RUN npm install --legacy-peer-deps
 COPY . .
 RUN npm run build
 

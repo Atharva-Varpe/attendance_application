@@ -68,38 +68,100 @@ export default function AttendancePage() {
   return (
     <div className="attendance-page">
       <Toast ref={toast} />
-      <div className="grid">
-        <div className="col-12 lg:col-9">
-          <Card title="Attendance Report" subTitle="Last month">
-            <div className="p-d-flex p-ai-center p-gap-3 mb-3 p-flex-wrap">
-              <div>
-                <label className="p-mb-1 block">Status</label>
-                <Dropdown value={status} options={statusOptions} onChange={(e) => setStatus(e.value)} showClear placeholder="Filter status" />
-              </div>
-              <div>
-                <label className="p-mb-1 block">Date Range</label>
-                <Calendar value={range} onChange={(e) => setRange(e.value)} selectionMode="range" readOnlyInput placeholder="Select range" />
-              </div>
-            </div>
+      
+      <div className="page-header">
+        <h1>Attendance Report</h1>
+        <p>View your attendance history and monthly summary</p>
+      </div>
 
-            {loading ? (
-              <div className="p-d-flex p-flex-column p-gap-2">
-                <Skeleton height="2rem" />
-                <Skeleton height="2rem" />
-                <Skeleton height="2rem" />
-              </div>
-            ) : (
-              <DataTable value={filtered} stripedRows showGridlines paginator rows={10} responsiveLayout="scroll" emptyMessage="No records">
-                <Column field="date" header="Date" sortable />
-                <Column field="status" header="Status" body={statusBody} sortable />
-                <Column header="Check-in" body={(r) => time(r.checkIn)} />
-                <Column header="Check-out" body={(r) => time(r.checkOut)} />
-              </DataTable>
-            )}
-          </Card>
+      <div className="attendance-grid">
+        <div className="attendance-main">
+          <div className="section-title">Attendance Records</div>
+          
+          <div className="controls">
+            <div className="selector">
+              <label>Filter by Status</label>
+              <Dropdown 
+                value={status} 
+                options={statusOptions} 
+                onChange={(e) => setStatus(e.value)} 
+                showClear 
+                placeholder="All statuses" 
+              />
+            </div>
+            <div className="selector">
+              <label>Date Range</label>
+              <Calendar 
+                value={range} 
+                onChange={(e) => setRange(e.value)} 
+                selectionMode="range" 
+                readOnlyInput 
+                placeholder="Select date range" 
+              />
+            </div>
+          </div>
+
+          {loading ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <Skeleton height="2rem" />
+              <Skeleton height="2rem" />
+              <Skeleton height="2rem" />
+              <Skeleton height="2rem" />
+              <Skeleton height="2rem" />
+            </div>
+          ) : (
+            <DataTable 
+              value={filtered} 
+              paginator 
+              rows={15} 
+              responsiveLayout="scroll" 
+              emptyMessage="No attendance records found"
+              className="professional-table"
+            >
+              <Column 
+                field="date" 
+                header="Date" 
+                sortable 
+                body={(rowData) => new Date(rowData.date).toLocaleDateString('en-US', { 
+                  weekday: 'short', 
+                  year: 'numeric', 
+                  month: 'short', 
+                  day: 'numeric' 
+                })}
+              />
+              <Column 
+                field="status" 
+                header="Status" 
+                body={(rowData) => (
+                  <div className="attendance-status">
+                    <span className={`status-icon ${rowData.status.toLowerCase()}`}></span>
+                    <Tag 
+                      value={rowData.status} 
+                      severity={
+                        rowData.status === 'Present' ? 'success' :
+                        rowData.status === 'Absent' ? 'danger' :
+                        rowData.status === 'Late' ? 'warning' : 'info'
+                      }
+                    />
+                  </div>
+                )}
+                sortable 
+              />
+              <Column 
+                header="Check-in Time" 
+                body={(r) => time(r.checkIn)} 
+              />
+              <Column 
+                header="Check-out Time" 
+                body={(r) => time(r.checkOut)} 
+              />
+            </DataTable>
+          )}
         </div>
-        <div className="col-12 lg:col-3">
-          <Card title="Monthly Summary">
+
+        <div className="attendance-sidebar">
+          <div className="today-summary">
+            <div className="summary-title">Monthly Summary</div>
             {loading ? (
               <>
                 <Skeleton height="1.5rem" className="mb-2" />
@@ -108,14 +170,26 @@ export default function AttendancePage() {
                 <Skeleton height="1.5rem" />
               </>
             ) : (
-              <ul className="p-0" style={{ listStyle: 'none' }}>
-                <li className="p-d-flex p-jc-between p-my-2"><span>Present</span><Tag value={summary.Present} severity="success" /></li>
-                <li className="p-d-flex p-jc-between p-my-2"><span>Absent</span><Tag value={summary.Absent} severity="danger" /></li>
-                <li className="p-d-flex p-jc-between p-my-2"><span>Late</span><Tag value={summary.Late} severity="warning" /></li>
-                <li className="p-d-flex p-jc-between p-my-2"><span>Leave</span><Tag value={summary.Leave} severity="info" /></li>
-              </ul>
+              <>
+                <div className="summary-item">
+                  <span className="item-label">Present Days</span>
+                  <span className="item-value" style={{ color: '#10b981' }}>{summary.Present}</span>
+                </div>
+                <div className="summary-item">
+                  <span className="item-label">Absent Days</span>
+                  <span className="item-value" style={{ color: '#ef4444' }}>{summary.Absent}</span>
+                </div>
+                <div className="summary-item">
+                  <span className="item-label">Late Arrivals</span>
+                  <span className="item-value" style={{ color: '#f59e0b' }}>{summary.Late}</span>
+                </div>
+                <div className="summary-item">
+                  <span className="item-label">Leaves Taken</span>
+                  <span className="item-value" style={{ color: '#3b82f6' }}>{summary.Leave}</span>
+                </div>
+              </>
             )}
-          </Card>
+          </div>
         </div>
       </div>
     </div>

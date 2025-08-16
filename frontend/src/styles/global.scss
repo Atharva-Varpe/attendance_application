@@ -7,84 +7,428 @@ html, body, #root {
 
 body {
   margin: 0;
-  color: $text-900;
-  // Gradient background
+  color: $text-800;
   @include gradient-bg();
   background-attachment: fixed;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Override gradient with a global background image across the app */
+// Professional app shell
 .app-shell {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-image: url('/background.jpg'); /* served from frontend/public */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background: none;
 }
 
-// Menubar and footer subtle transparency
+// Enhanced menubar with professional styling
 .p-menubar {
-  @include glass($surface-strong, $blur-sm);
-  margin: $space-4;
-  border-radius: $radius-md;
+  @include glass($surface-strong, $blur-lg, $border-strong, $shadow-lg);
+  margin: $space-4 $space-4 0;
+  border-radius: $radius-xl;
+  padding: $space-2 $space-4;
+  
+  .p-menubar-start {
+    .company-logo {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: $primary-700;
+      text-decoration: none;
+      
+      &:hover {
+        color: $primary-800;
+      }
+    }
+  }
+  
+  .p-menubar-end {
+    .user-info {
+      @include flex-center;
+      gap: $space-3;
+      
+      .p-avatar {
+        background: linear-gradient(135deg, $primary-600, $primary-700);
+      }
+      
+      .user-details {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        
+        .user-name {
+          font-weight: 600;
+          color: $text-800;
+          font-size: 0.875rem;
+        }
+        
+        .user-role {
+          font-size: 0.75rem;
+          color: $text-500;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+      }
+    }
+  }
 }
 
+// Professional main content area
 main.app-main {
   flex: 1;
-  padding: $space-6;
-  @include container;
-  background: transparent; // ensure content area does not override bg
+  padding: $space-4;
+  background: transparent;
+  width: 100%;
+  
+  @media (max-width: 768px) {
+    padding: $space-3 $space-2;
+  }
 }
 
+// Enhanced footer
 footer.app-footer {
-  margin: $space-4;
-  @include glass($surface, $blur-sm);
+  margin: 0 $space-4 $space-4;
+  @include glass($surface, $blur-md, $border, $shadow-sm);
   text-align: center;
   padding: $space-4;
-  color: $text-700;
+  color: $text-600;
+  font-size: 0.875rem;
+  border-radius: $radius-xl;
 }
 
-// Generic glass card helper to use on pages
+// Professional page layout helpers
+.page-container {
+  @include container();
+  
+  .page-header {
+    @include page-header;
+  }
+}
+
+.page-card {
+  @include card($shadow-md);
+  padding: $space-8;
+  margin-bottom: $space-6;
+  
+  @media (max-width: 768px) {
+    padding: $space-6;
+    margin-bottom: $space-4;
+  }
+}
+
+// Enhanced glass card
 .glass-card {
-  @include glass();
-  padding: $space-6;
+  @include glass($surface, $blur-lg, $border, $shadow-lg);
+  padding: $space-8;
+  
+  @media (max-width: 768px) {
+    padding: $space-6;
+  }
 }
 
-// PrimeReact card override for glass look
+// Enhanced PrimeReact component overrides
 .p-card {
-  background: transparent;
-  border: none;
+  @include card();
+  border: 1px solid $border-strong;
+  
+  .p-card-header {
+    padding: $space-6 $space-6 0;
+    border-bottom: none;
+    
+    .p-card-title {
+      color: $text-900;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: $space-2;
+      letter-spacing: -0.025em;
+    }
+    
+    .p-card-subtitle {
+      color: $text-600;
+      font-size: 1rem;
+      font-weight: 400;
+      margin: 0;
+    }
+  }
+  
   .p-card-body {
-    @include glass();
+    padding: $space-6;
   }
-  .p-card-title {
-    color: $text-900;
+  
+  .p-card-content {
+    padding: 0;
   }
-  .p-card-subtitle {
+  
+  .p-card-footer {
+    padding: 0 $space-6 $space-6;
+    border-top: none;
+  }
+}
+
+// Professional buttons
+.p-button {
+  @include button-primary;
+  font-family: inherit;
+  
+  &.p-button-secondary {
+    background: $surface-card;
     color: $text-700;
+    border: 1px solid $border-strong;
+    
+    &:hover {
+      background: $surface-ground;
+      border-color: $primary-300;
+    }
   }
-}
-
-// Inputs and dialogs subtle transparency
-.p-inputtext, .p-password-input {
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 10px;
-}
-
-.p-dialog {
-  .p-dialog-content {
-    @include glass($surface, $blur-lg);
-  }
-  .p-dialog-header {
+  
+  &.p-button-outlined {
     background: transparent;
-    border: none;
+    color: $primary-600;
+    border: 1px solid $primary-200;
+    
+    &:hover {
+      background: $primary-50;
+      border-color: $primary-300;
+    }
+  }
+  
+  &.p-button-sm {
+    padding: $space-2 $space-4;
+    font-size: 0.875rem;
+  }
+  
+  &.p-button-lg {
+    padding: $space-4 $space-8;
+    font-size: 1.125rem;
   }
 }
 
-// Utility spacing
-.mt-6 { margin-top: $space-6; }
-.mb-6 { margin-bottom: $space-6; }
-.mx-4 { margin-left: $space-4; margin-right: $space-4; }
+// Enhanced form inputs
+.p-inputtext, .p-password-input, .p-dropdown, .p-calendar input {
+  background: $surface-card;
+  border: 1px solid $border-strong;
+  border-radius: $radius-md;
+  padding: $space-3 $space-4;
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+  
+  &:focus {
+    border-color: $primary-400;
+    box-shadow: var(--focus-ring);
+    outline: none;
+  }
+  
+  &::placeholder {
+    color: $text-400;
+  }
+}
+
+.p-float-label {
+  .p-inputtext:focus ~ label,
+  .p-inputtext.p-filled ~ label {
+    color: $primary-600;
+    font-weight: 500;
+  }
+}
+
+// Enhanced dialogs and modals
+.p-dialog {
+  border-radius: $radius-xl;
+  box-shadow: $shadow-2xl;
+  border: 1px solid $border-strong;
+  
+  .p-dialog-header {
+    background: $surface-card;
+    border-bottom: 1px solid $border;
+    border-radius: $radius-xl $radius-xl 0 0;
+    padding: $space-6;
+    
+    .p-dialog-title {
+      font-weight: 700;
+      color: $text-900;
+      font-size: 1.25rem;
+    }
+  }
+  
+  .p-dialog-content {
+    background: $surface-card;
+    padding: $space-6;
+    border-radius: 0 0 $radius-xl $radius-xl;
+  }
+  
+  .p-dialog-footer {
+    background: $surface-card;
+    border-top: 1px solid $border;
+    padding: $space-4 $space-6;
+    border-radius: 0 0 $radius-xl $radius-xl;
+    
+    @include flex-between;
+    gap: $space-3;
+  }
+}
+
+// Professional data tables
+.p-datatable {
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  
+  .p-datatable-header {
+    background: $surface-ground;
+    border: 1px solid $border-strong;
+    border-bottom: none;
+    padding: $space-4 $space-6;
+    border-radius: $radius-lg $radius-lg 0 0;
+    
+    @include flex-between;
+    
+    @media (max-width: 768px) {
+      padding: $space-3 $space-4;
+      flex-direction: column;
+      gap: $space-3;
+      align-items: stretch;
+    }
+  }
+  
+  .p-datatable-thead > tr > th {
+    background: $surface-ground;
+    border: 1px solid $border-strong;
+    color: $text-700;
+    font-weight: 600;
+    padding: $space-4 $space-3;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    
+    @media (max-width: 768px) {
+      padding: $space-3 $space-2;
+      font-size: 0.75rem;
+    }
+  }
+  
+  .p-datatable-tbody > tr {
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background: $primary-50;
+    }
+    
+    > td {
+      padding: $space-4 $space-3;
+      border: 1px solid $border;
+      
+      @media (max-width: 768px) {
+        padding: $space-3 $space-2;
+        font-size: 0.875rem;
+      }
+    }
+  }
+  
+  .p-datatable-footer {
+    background: $surface-ground;
+    border: 1px solid $border-strong;
+    border-top: none;
+    padding: $space-4 $space-6;
+    border-radius: 0 0 $radius-lg $radius-lg;
+    
+    @media (max-width: 768px) {
+      padding: $space-3 $space-4;
+    }
+  }
+  
+  // Full width responsive behavior
+  &.professional-table {
+    width: 100%;
+    
+    .p-datatable-scrollable-wrapper {
+      width: 100%;
+    }
+    
+    .p-datatable-scrollable-table {
+      width: 100%;
+    }
+  }
+}
+
+// Enhanced tags and badges
+.p-tag {
+  border-radius: $radius-md;
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: $space-1 $space-3;
+  
+  &.p-tag-success {
+    background: $success;
+    color: white;
+  }
+  
+  &.p-tag-info {
+    background: $primary-600;
+    color: white;
+  }
+  
+  &.p-tag-warning {
+    background: $warning;
+    color: white;
+  }
+  
+  &.p-tag-danger {
+    background: $error;
+    color: white;
+  }
+}
+
+// Professional menu styling
+.p-menu {
+  border-radius: $radius-lg;
+  border: 1px solid $border-strong;
+  box-shadow: $shadow-xl;
+  
+  .p-menu-list {
+    padding: $space-2;
+    
+    .p-menuitem-link {
+      border-radius: $radius-md;
+      margin: $space-1 0;
+      padding: $space-3 $space-4;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: $primary-50;
+        color: $primary-700;
+      }
+    }
+  }
+}
+
+// Toast notifications
+.p-toast {
+  .p-toast-message {
+    border-radius: $radius-lg;
+    box-shadow: $shadow-lg;
+    border: 1px solid $border-strong;
+    
+    &.p-toast-message-success {
+      border-left: 4px solid $success;
+    }
+    
+    &.p-toast-message-error {
+      border-left: 4px solid $error;
+    }
+    
+    &.p-toast-message-warn {
+      border-left: 4px solid $warning;
+    }
+    
+    &.p-toast-message-info {
+      border-left: 4px solid $primary-600;
+    }
+  }
+}

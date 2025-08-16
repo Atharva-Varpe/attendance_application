@@ -1,0 +1,270 @@
+@use '../../styles/_the  .statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: $space-6;
+    margin-bottom: $space-10;
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: $space-4;
+    }
+  }
+
+  .stat-card {
+    @include card($shadow-md);
+    padding: $space-6;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, $surface-ground, $surface-0);
+    border: 1px solid $border;
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: $shadow-xl;
+      border-color: $primary-200;
+    }
+    
+    .stat-icon {
+      font-size: 2.5rem;
+      color: $primary-600;
+      margin-bottom: $space-4;
+      display: block;
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: $text-900;
+      margin-bottom: $space-2;
+      background: linear-gradient(135deg, $primary-600, $primary-800);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: $text-600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+  }.admin-page {
+  @include full-width-container;
+
+  .page-header {
+    @include page-header;
+    text-align: center;
+    margin-bottom: $space-10;
+    
+    h1 {
+      background: linear-gradient(135deg, $primary-600, $primary-800);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    p {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+  }
+
+  .statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: $space-6;
+    margin-bottom: $space-10;
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: $space-4;
+    }
+  }
+
+  .admin-sections {
+    display: grid;
+    gap: $space-6;
+    grid-template-columns: 1fr;
+    
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @media (min-width: 1400px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .admin-section {
+    @include card($shadow-lg);
+    padding: $space-8;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: $shadow-xl;
+    }
+    
+    .section-header {
+      @include flex-between;
+      margin-bottom: $space-6;
+      padding-bottom: $space-4;
+      border-bottom: 1px solid $border;
+      
+      .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: $text-900;
+        margin: 0;
+      }
+      
+      .section-action {
+        .p-button {
+          padding: $space-2 $space-4;
+          font-size: 0.875rem;
+          
+          &.p-button-outlined {
+            border-color: $primary-300;
+            color: $primary-600;
+            
+            &:hover {
+              background: $primary-50;
+            }
+          }
+        }
+      }
+    }
+    
+    .section-content {
+      .empty-state {
+        text-align: center;
+        padding: $space-8 $space-4;
+        
+        .empty-icon {
+          font-size: 3rem;
+          color: $text-400;
+          margin-bottom: $space-4;
+        }
+        
+        .empty-title {
+          font-size: 1.125rem;
+          font-weight: 600;
+          color: $text-600;
+          margin-bottom: $space-2;
+        }
+        
+        .empty-description {
+          color: $text-500;
+          font-size: 0.875rem;
+          line-height: 1.5;
+        }
+      }
+    }
+  }
+
+  // Enhanced data table styling
+  .p-datatable {
+    border-radius: $radius-lg;
+    overflow: hidden;
+    box-shadow: $shadow-sm;
+    
+    .p-datatable-header {
+      background: $surface-ground;
+      padding: $space-4;
+      border-bottom: 1px solid $border;
+      
+      .table-header {
+        @include flex-between;
+        
+        .table-title {
+          font-weight: 600;
+          color: $text-700;
+          font-size: 0.875rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+      }
+    }
+    
+    .p-datatable-thead > tr > th {
+      background: $surface-ground;
+      font-weight: 600;
+      color: $text-700;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      padding: $space-4;
+      border-bottom: 2px solid $border;
+    }
+    
+    .p-datatable-tbody > tr {
+      &:hover {
+        background: $primary-50;
+      }
+      
+      > td {
+        padding: $space-4;
+        border-bottom: 1px solid $border;
+        
+        .p-tag {
+          font-size: 0.75rem;
+          padding: $space-1 $space-2;
+        }
+      }
+    }
+    
+    .p-paginator {
+      background: $surface-ground;
+      border-top: 1px solid $border;
+      padding: $space-3 $space-4;
+    }
+  }
+
+  // Professional form styling for dialogs
+  .admin-form {
+    .form-grid {
+      display: grid;
+      gap: $space-4;
+      
+      .form-field {
+        .field-label {
+          display: block;
+          font-weight: 600;
+          color: $text-700;
+          margin-bottom: $space-2;
+          font-size: 0.875rem;
+        }
+        
+        .p-inputtext, .p-dropdown {
+          width: 100%;
+          padding: $space-3;
+        }
+      }
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: $space-3;
+      margin-top: $space-6;
+      padding-top: $space-4;
+      border-top: 1px solid $border;
+    }
+  }
+
+  // Statistics cards
+      .admin-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: $space-8;
+    
+    @media (max-width: 1200px) {
+      grid-template-columns: 1fr;
+    }
+    
+    @media (max-width: 768px) {
+      gap: $space-6;
+    }
+  }
+}

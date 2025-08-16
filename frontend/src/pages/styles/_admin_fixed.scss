@@ -38,7 +38,7 @@
     padding: $space-6;
     text-align: center;
     transition: all 0.3s ease;
-    background: linear-gradient(135deg, $surface-ground, $surface-card);
+    background: linear-gradient(135deg, $surface-ground, $surface-0);
     border: 1px solid $border;
     
     &:hover {
@@ -186,7 +186,7 @@
 }
 
 // Modal forms styling
-.p-dialog .admin-page {
+.p-dialog {
   .p-dialog-header {
     background: $surface-ground;
     border-bottom: 1px solid $border;
@@ -240,8 +240,8 @@
   }
 }
 
-// Professional tag styling for admin page
-.admin-page .p-tag {
+// Professional tag styling
+.p-tag {
   font-weight: 500;
   text-transform: capitalize;
   border-radius: $radius-sm;

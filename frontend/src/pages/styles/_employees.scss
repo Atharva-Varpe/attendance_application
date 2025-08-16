@@ -1,52 +1,189 @@
 @use '../../styles/_theme' as *;
 
 .employees-page {
-  @include container;
-
-  .page-card {
-    @include glass();
-    padding: $space-6;
-  }
+  @include full-width-container;
 
   .page-header {
-    margin-bottom: $space-4;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .p-toolbar {
-    background: transparent;
-    border: none;
-    padding: 0;
-    margin-bottom: $space-4;
-
-    .p-toolbar-group-left,
-    .p-toolbar-group-right {
-      gap: $space-4;
+    @include page-header;
+    margin-bottom: $space-8;
+    
+    h1 {
+      background: linear-gradient(135deg, $primary-600, $primary-800);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
   }
 
+  .employees-container {
+    @include card($shadow-lg);
+    padding: $space-6;
+    margin-bottom: $space-6;
+    
+    @media (max-width: 768px) {
+      padding: $space-4;
+    }
+    
+    .table-header {
+      @include flex-between;
+      margin-bottom: $space-6;
+      padding-bottom: $space-4;
+      border-bottom: 1px solid $border;
+      
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: $space-4;
+        align-items: stretch;
+      }
+      
+      h2 {
+        margin: 0;
+        color: $text-800;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      
+      .header-actions {
+        display: flex;
+        gap: $space-4;
+        align-items: center;
+        
+        @media (max-width: 768px) {
+          justify-content: space-between;
+        }
+        
+        .search-wrapper {
+          position: relative;
+          
+          .p-inputtext {
+            min-width: 300px;
+            
+            @media (max-width: 768px) {
+              min-width: 200px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .employees-header {
+    @include flex-between;
+    margin-bottom: $space-6;
+    padding-bottom: $space-4;
+    border-bottom: 1px solid $border;
+    
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $text-900;
+      margin: 0;
+    }
+    
+    .section-subtitle {
+      color: $text-600;
+      font-size: 1rem;
+      margin-top: $space-1;
+    }
+  }
+
+  // Enhanced data table styling
   .p-datatable {
-    .p-datatable-header {
-      background: transparent;
-      border: none;
-      padding-left: 0;
-      padding-right: 0;
+    border-radius: $radius-lg;
+    overflow: hidden;
+    box-shadow: $shadow-sm;
+    
+    .p-datatable-thead > tr > th {
+      background: $surface-ground;
+      font-weight: 600;
+      color: $text-700;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      padding: $space-4;
+      border-bottom: 2px solid $border;
+    }
+    
+    .p-datatable-tbody > tr {
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background: $primary-50;
+      }
+      
+      > td {
+        padding: $space-4;
+        border-bottom: 1px solid $border;
+        
+        .employee-name {
+          font-weight: 600;
+          color: $text-800;
+        }
+        
+        .employee-email {
+          color: $text-600;
+          font-size: 0.875rem;
+        }
+        
+        .employee-department {
+          background: $surface-ground;
+          padding: $space-1 $space-2;
+          border-radius: $radius-sm;
+          font-size: 0.75rem;
+          color: $text-700;
+        }
+        
+        .p-tag {
+          font-size: 0.75rem;
+          padding: $space-1 $space-2;
+        }
+      }
+    }
+    
+    .p-paginator {
+      background: $surface-ground;
+      border-top: 1px solid $border;
+      padding: $space-3 $space-4;
+    }
+  }
+
+  // Empty state styling
+  .empty-state {
+    text-align: center;
+    padding: $space-12 $space-4;
+    
+    .empty-icon {
+      font-size: 4rem;
+      color: $text-300;
       margin-bottom: $space-4;
     }
-    .p-datatable-thead > tr > th {
-      background: rgba(255,255,255,0.7);
-      backdrop-filter: blur($blur-sm);
+    
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: $text-600;
+      margin-bottom: $space-2;
     }
-    .p-datatable-tbody > tr > td {
-      background: rgba(255,255,255,0.55);
+    
+    .empty-description {
+      color: $text-500;
+      font-size: 1rem;
+      line-height: 1.5;
+      max-width: 400px;
+      margin: 0 auto;
     }
   }
 
-  .p-dialog {
-    .p-dialog-content {
-      @include glass($surface, $blur-lg);
+  // Loading state
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: $space-12;
+    
+    .loading-spinner {
+      font-size: 2rem;
+      color: $primary-600;
     }
   }
 }
