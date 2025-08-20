@@ -208,12 +208,11 @@ def admin_required(func):
 def create_employee():
     """Creates a new employee record."""
     data = request.get_json()
-    if not data or not all(k in data for k in ['name', 'email', 'designation', 'daily_wage']):
+    if not data or not all(k in data for k in ['name', 'email', 'role', 'salary']):
         return jsonify({'error': 'Missing required fields'}), 400
 
-    # Convert daily_wage to monthly salary (assuming 22 working days)
-    daily_wage = float(data['daily_wage'])
-    monthly_salary = daily_wage * 22
+    # Use the monthly salary directly from frontend
+    monthly_salary = float(data['salary'])
     
     # Create a simple password hash
     password = 'employee123'  # Default password
@@ -225,8 +224,8 @@ def create_employee():
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "INSERT INTO employees (full_name, email, password_hash, job_title, gross_monthly_salary, date_of_joining, role) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (data['name'], data['email'], password_hash, data['designation'], monthly_salary, date_of_joining, 'Employee')
+            "INSERT INTO employees (full_name, email, password_hash, job_title, department, phone_number, gross_monthly_salary, date_of_joining, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (data['name'], data['email'], password_hash, data.get('role', 'Employee'), data.get('department', ''), data.get('phone', ''), monthly_salary, date_of_joining, 'Employee')
         )
         conn.commit()
         new_employee_id = cursor.lastrowid

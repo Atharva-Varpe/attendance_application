@@ -9,6 +9,7 @@ import { Menu } from 'primereact/menu';
 
 import AuthProvider from './context/AuthContext.jsx';
 import { useAuth } from './context/useAuth.js';
+import SessionManager from './components/SessionManager.jsx';
 
 // Lazy load pages
 const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
@@ -377,6 +378,7 @@ export default function App() {
   return (
     <PrimeReactProvider>
       <AuthProvider>
+        <SessionManager />
         <Layout />
       </AuthProvider>
     </PrimeReactProvider>

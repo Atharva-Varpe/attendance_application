@@ -33,6 +33,11 @@ export async function apiRequest(endpoint, options = {}) {
     const data = await response.json();
     
     if (!response.ok) {
+      // Check if it's an authentication error
+      if (response.status === 401) {
+        // Trigger logout if token is invalid/expired
+        window.dispatchEvent(new CustomEvent('auth:token-expired'));
+      }
       throw new Error(data.error || `HTTP error! status: ${response.status}`);
     }
     
@@ -48,4 +53,51 @@ export async function apiRequestAuth(endpoint, token, options = {}) {
     ...options,
     headers: withAuth(options.headers, token),
   });
+}
+
+// Token management utilities
+export function isTokenExpired(token) {
+  if (!token) return true;
+  
+  try {
+    // Decode the JWT token payload (basic decode, not verification)
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      // This is not a JWT token, it might be a different format
+      // For now, let the backend handle expiration validation
+      return false;
+    }
+    
+    const payload = JSON.parse(atob(parts[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    
+    // Check if token has exp field and if it's expired
+    if (payload.exp && payload.exp < currentTime) {
+      return true;
+    }
+    
+    // If no exp field, consider it valid (let backend handle expiration)
+    return false;
+  } catch (error) {
+    console.warn('Error checking token expiration:', error);
+    // If we can't decode, don't assume it's expired - let backend validate
+    return false;
+  }
+}
+
+export function clearAuthData() {
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('auth_user');
+  sessionStorage.clear(); // Clear session storage too
+  
+  // Clear any cached data
+  if ('caches' in window) {
+    caches.keys().then(names => {
+      names.forEach(name => {
+        if (name.includes('auth') || name.includes('user')) {
+          caches.delete(name);
+        }
+      });
+    });
+  }
 }
