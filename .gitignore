@@ -1,0 +1,51 @@
+# General
+*.log
+*.tmp
+*.swp
+*.swo
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node / Frontend
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.cache/
+
+# Environment & secrets
+.env
+**/.env
+.env.*.local
+
+# Databases & backups
+*.sqlite
+*.db
+*.db3
+employee.db
+backend/employee.db
+db_backups/
+
+# Build artifacts
+frontend/dist/
+
+# IDEs
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Docker
+**/.dockerignore
+
+# OS
+Thumbs.db

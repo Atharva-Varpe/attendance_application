@@ -4,9 +4,22 @@ from .config import DATABASE_PATH, SCHEMA_PATH
 
 
 def get_db_connection() -> sqlite3.Connection:
-    conn = sqlite3.connect(DATABASE_PATH)
+    conn = sqlite3.connect(DATABASE_PATH, timeout=30, check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    _apply_pragmas(conn)
     return conn
+
+
+def _apply_pragmas(conn: sqlite3.Connection) -> None:
+    try:
+        cur = conn.cursor()
+        cur.execute("PRAGMA journal_mode=WAL;")
+        cur.execute("PRAGMA synchronous=NORMAL;")
+        cur.execute("PRAGMA foreign_keys=ON;")
+        cur.close()
+    except Exception:
+        # Pragmas are best-effort; ignore if not supported
+        pass
 
 
 def init_db_if_needed() -> None:

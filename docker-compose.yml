@@ -7,8 +7,6 @@ services:
     environment:
       # Ensure DATABASE path defaults inside container
       - DATABASE=/data/employee.db
-      - SECRET_KEY=your-production-secret-change-this
-      - ALLOWED_ORIGINS=http://localhost:80,https://yourdomain.com
     ports:
       - "5000:5000"
     volumes:
