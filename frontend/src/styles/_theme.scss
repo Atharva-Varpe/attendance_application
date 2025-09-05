@@ -185,19 +185,46 @@ $space-24: 6rem;
     linear-gradient($angle, $surface-ground 0%, #f1f5f9 50%, $primary-50 100%);
 }
 
+// Dark mode color palette
+$dark-primary: #3b82f6; // blue-500 for dark mode
+$dark-primary-50: #0f172a;
+$dark-primary-100: #1e293b;
+$dark-primary-200: #334155;
+$dark-primary-300: #475569;
+$dark-primary-400: #64748b;
+$dark-primary-500: #94a3b8;
+$dark-primary-600: #cbd5e1;
+$dark-primary-700: #e2e8f0;
+$dark-primary-800: #f1f5f9;
+$dark-primary-900: #f8fafc;
+
+$dark-surface: rgba(15, 23, 42, 0.85); // slate-900 with opacity
+$dark-surface-strong: rgba(15, 23, 42, 0.95);
+$dark-surface-card: #0f172a; // slate-900
+$dark-surface-ground: #1e293b; // slate-800
+$dark-border: rgba(51, 65, 85, 0.6); // slate-700 with opacity
+$dark-border-strong: #334155; // slate-700
+
+$dark-text-900: #f8fafc; // slate-50
+$dark-text-800: #f1f5f9; // slate-100
+$dark-text-700: #e2e8f0; // slate-200
+$dark-text-600: #cbd5e1; // slate-300
+$dark-text-500: #94a3b8; // slate-400
+$dark-text-400: #64748b; // slate-500
+
 // CSS Custom Properties for PrimeReact theming
 :root {
   // Primary colors
   --primary-color: #{$primary-600};
   --primary-color-text: #ffffff;
-  
+
   // Surface colors
   --surface-ground: #{$surface-ground};
   --surface-section: #{$surface-card};
   --surface-card: #{$surface-card};
   --surface-overlay: #{$surface-strong};
   --surface-border: #{$border-strong};
-  
+
   // Text colors
   --text-color: #{$text-800};
   --text-color-secondary: #{$text-600};
@@ -205,10 +232,31 @@ $space-24: 6rem;
   --text-700: #{$text-700};
   --text-800: #{$text-800};
   --text-900: #{$text-900};
-  
+
   // Component specific
   --border-radius: #{$radius-md};
   --focus-ring: 0 0 0 2px #{rgba($primary-600, 0.2)};
+}
+
+.dark {
+  // Dark mode overrides
+  --primary-color: #{$dark-primary};
+  --primary-color-text: #{$dark-text-900};
+
+  --surface-ground: #{$dark-surface-ground};
+  --surface-section: #{$dark-surface-card};
+  --surface-card: #{$dark-surface-card};
+  --surface-overlay: #{$dark-surface-strong};
+  --surface-border: #{$dark-border-strong};
+
+  --text-color: #{$dark-text-800};
+  --text-color-secondary: #{$dark-text-600};
+  --text-600: #{$dark-text-600};
+  --text-700: #{$dark-text-700};
+  --text-800: #{$dark-text-800};
+  --text-900: #{$dark-text-900};
+
+  --focus-ring: 0 0 0 2px #{rgba($dark-primary, 0.2)};
 }
 
 // Enhanced utility classes

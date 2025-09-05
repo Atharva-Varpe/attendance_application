@@ -1,14 +1,12 @@
-import React, { useEffect, useRef } from 'react';
-import { Toast } from 'primereact/toast';
+import React, { useEffect } from 'react';
 
 /**
  * A global component responsible for displaying authentication-related notifications.
  * It listens for custom window events dispatched from the AuthContext and
- * provides immediate visual feedback to the user for events like session 
+ * provides immediate visual feedback to the user for events like session
  * expiration and manual logout.
  */
 export default function SessionManager() {
-  const toast = useRef(null);
 
   useEffect(() => {
     /**
@@ -17,26 +15,17 @@ export default function SessionManager() {
      */
     const handleSessionExpiredToast = (event) => {
       const message = event.detail?.message || 'Your session has expired. Please log in again.';
-      
-      toast.current?.show({
-        severity: 'warn',
-        summary: 'Session Expired',
-        detail: message,
-        life: 5000,
-        sticky: true // Make it sticky so the user must acknowledge it
-      });
+      console.warn('Session Expired:', message);
+      // TODO: Replace with shadcn toast when implemented
+      alert(message); // Temporary fallback
     };
 
     /**
      * Handles the display of a toast notification after a user manually logs out.
      */
     const handleLogoutToast = () => {
-      toast.current?.show({
-        severity: 'success',
-        summary: 'Logged Out',
-        detail: 'You have successfully logged out.',
-        life: 3000
-      });
+      console.log('Logged Out: You have successfully logged out.');
+      // TODO: Replace with shadcn toast when implemented
     };
 
     // Listen for the specific event to show a session expiration TOAST.
@@ -51,5 +40,5 @@ export default function SessionManager() {
     };
   }, []); // Empty dependency array ensures this runs only once on mount
 
-  return <Toast ref={toast} position="top-center" />;
+  return null; // No UI component needed, just event listeners
 }

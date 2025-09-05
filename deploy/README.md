@@ -52,6 +52,14 @@ chmod +x deploy/setup.sh
 - Web interface: http://<machine-ip>:80
 - API endpoints: http://<machine-ip>:5000/api
 
+### Default credentials
+- Admin: `admin@example.com` / `admin123`
+- Gate: `gate@example.com` / `gate123`
+- New employees: default password `employee123` (change after first login)
+
+### Server time endpoint
+- For client time sync: `GET /api/time` returns `{ iso, epochMs, timezone, offsetMinutes }`
+
 ## Verification Steps
 1. Check running containers:
 ```bash

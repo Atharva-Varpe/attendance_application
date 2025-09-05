@@ -5,6 +5,8 @@ services:
       - "80:80"
     depends_on:
       - backend
+    environment:
+      - NODE_ENV=production
     networks:
       - app-network
 
@@ -15,7 +17,8 @@ services:
     volumes:
       - backend-data:/data
     environment:
-      - SECRET_KEY=your-production-secret
+      - SECRET_KEY=your-production-secret-change-this
+      - ALLOWED_ORIGINS=http://localhost:80,https://yourdomain.com
     networks:
       - app-network
 

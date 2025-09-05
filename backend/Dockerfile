@@ -13,9 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Use gunicorn as production server
-ENV FLASK_APP=app.py
-ENV FLASK_ENV=production
+# Environment
 ENV SECRET_KEY=your-production-secret
 ENV DATABASE=/data/employee.db
 
@@ -25,4 +23,4 @@ EXPOSE 5000
 RUN mkdir -p /data && \
     if [ -f employee.db ]; then cp employee.db /data/; fi
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "app:app"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]

@@ -1,28 +1,27 @@
 import React from 'react';
-import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
-import { InputText } from 'primereact/inputtext';
-import { Dropdown } from 'primereact/dropdown';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { Toast } from 'primereact/toast';
-import { Tag } from 'primereact/tag';
+import { Button } from '../components/ui/button.jsx';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../components/ui/dialog.jsx';
+import { Input } from '../components/ui/input.jsx';
+import { Label } from '../components/ui/label.jsx';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table.jsx';
+import { Badge } from '../components/ui/badge.jsx';
 import { useAuth } from '../context/useAuth.js';
 import './styles/_admin.scss';
 
 export default function AdminDashboard() {
-  const { getEmployees, getAdminSummary, createEmployee } = useAuth();
+  const { getEmployees, getAdminSummary, createEmployee, deleteEmployee, checkIn, checkOut } = useAuth();
   const toast = React.useRef(null);
 
   // Local state for API data
   const [employees, setEmployees] = React.useState([]);
   const [summary, setSummary] = React.useState({
-    total_employees: 0,
-    present_today: 0,
-    absent_today: 0,
-    total_departments: 0
+    employeeCount: 0,
+    activeEmployeeCount: 0,
+    todayAttendanceCount: 0,
+    lateCount: 0,
   });
   const [loading, setLoading] = React.useState(true);
+  const [markEmployeeId, setMarkEmployeeId] = React.useState('');
 
   const [showCreateEmp, setShowCreateEmp] = React.useState(false);
   const [empForm, setEmpForm] = React.useState({ 
@@ -117,10 +116,15 @@ export default function AdminDashboard() {
     }
   }
 
-  const renderStatusTag = (rowData) => {
-    const severity = rowData.status === 'Active' ? 'success' : 'danger';
-    return <Tag value={rowData.status} severity={severity} />;
-  };
+  async function onDeactivateEmployee(emp) {
+    const res = await deleteEmployee(emp.employee_id);
+    if (res.ok) {
+      toast.current?.show({ severity: 'success', summary: 'Deactivated', detail: 'Employee deactivated' });
+      loadData();
+    } else {
+      toast.current?.show({ severity: 'error', summary: 'Error', detail: res.error || 'Failed to deactivate' });
+    }
+  }
 
   if (loading) {
     return (
@@ -139,47 +143,63 @@ export default function AdminDashboard() {
       
       <div className="admin-page">
         <div className="page-header">
-          <h1>Admin Dashboard</h1>
-          <p>Manage your organization's employees, attendance records, and salary information</p>
+          <h1 className="m-0 text-2xl font-semibold">Admin Dashboard</h1>
+          <p className="text-sm text-muted-foreground">Manage your organization's employees, attendance records, and salary information</p>
         </div>
 
         {/* Statistics Overview */}
         <div className="statistics-grid">
           <div className="stat-card">
             <i className="pi pi-users stat-icon"></i>
-            <div className="stat-value">{summary.total_employees}</div>
+            <div className="stat-value">{summary.employeeCount}</div>
             <div className="stat-label">Total Employees</div>
           </div>
           <div className="stat-card">
+            <i className="pi pi-user-plus stat-icon"></i>
+            <div className="stat-value">{summary.activeEmployeeCount}</div>
+            <div className="stat-label">Active Employees</div>
+          </div>
+          <div className="stat-card">
             <i className="pi pi-calendar-check stat-icon"></i>
-            <div className="stat-value">{summary.present_today}</div>
+            <div className="stat-value">{summary.todayAttendanceCount}</div>
             <div className="stat-label">Present Today</div>
           </div>
           <div className="stat-card">
-            <i className="pi pi-calendar-times stat-icon"></i>
-            <div className="stat-value">{summary.absent_today}</div>
-            <div className="stat-label">Absent Today</div>
-          </div>
-          <div className="stat-card">
-            <i className="pi pi-building stat-icon"></i>
-            <div className="stat-value">{summary.total_departments}</div>
-            <div className="stat-label">Departments</div>
+            <i className="pi pi-clock stat-icon"></i>
+            <div className="stat-value">{summary.lateCount}</div>
+            <div className="stat-label">Late Today</div>
           </div>
         </div>
 
         {/* Admin Management Sections */}
         <div className="admin-sections">
+          {/* Quick Check-in/Out */}
+          <div className="admin-section">
+            <div className="section-header">
+              <h3 className="section-title">Quick Check-in/Out</h3>
+            </div>
+            <div className="section-content" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <Input value={markEmployeeId} onChange={(e) => setMarkEmployeeId(e.target.value)} placeholder="Employee ID" />
+              <Button onClick={async () => {
+                if (!markEmployeeId) return;
+                const res = await checkIn(Number(markEmployeeId));
+                toast.current?.show({ severity: res.ok ? 'success' : 'error', summary: res.ok ? 'Checked in' : 'Error', detail: res.ok ? 'Check-in recorded' : res.error });
+              }}>Check-in</Button>
+              <Button variant="secondary" onClick={async () => {
+                if (!markEmployeeId) return;
+                const res = await checkOut(Number(markEmployeeId));
+                toast.current?.show({ severity: res.ok ? 'success' : 'error', summary: res.ok ? 'Checked out' : 'Error', detail: res.ok ? 'Check-out recorded' : res.error });
+              }}>Check-out</Button>
+            </div>
+          </div>
           {/* Employee Management Section */}
           <div className="admin-section">
             <div className="section-header">
               <h3 className="section-title">Employee Management</h3>
               <div className="section-action">
-                <Button 
-                  label="Add Employee" 
-                  icon="pi pi-user-plus" 
-                  onClick={() => setShowCreateEmp(true)}
-                  className="p-button-success"
-                />
+                <Button onClick={() => setShowCreateEmp(true)}>
+                  <span className="pi pi-user-plus mr-2" /> Add Employee
+                </Button>
               </div>
             </div>
             <div className="section-content">
@@ -190,14 +210,32 @@ export default function AdminDashboard() {
                   <div className="empty-description">Add your first employee to get started</div>
                 </div>
               ) : (
-                <DataTable value={employees} stripedRows showGridlines paginator rows={5}>
-                  <Column field="employee_id" header="Employee ID" />
-                  <Column field="name" header="Name" />
-                  <Column field="email" header="Email" />
-                  <Column field="role" header="Role" />
-                  <Column field="department" header="Department" />
-                  <Column field="status" header="Status" body={renderStatusTag} />
-                </DataTable>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Employee ID</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Designation</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {employees.map((employee, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{employee.employee_id}</TableCell>
+                        <TableCell>{employee.name}</TableCell>
+                        <TableCell>{employee.email}</TableCell>
+                        <TableCell>{employee.designation}</TableCell>
+                        <TableCell>
+                          <Button variant="destructive" className="h-8 px-2" onClick={() => onDeactivateEmployee(employee)}>
+                            Deactivate
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </div>
           </div>
@@ -205,31 +243,27 @@ export default function AdminDashboard() {
       </div>
 
       {/* Create Employee Dialog */}
-      <Dialog 
-        header="Create New Employee" 
-        visible={showCreateEmp} 
-        style={{ width: '600px' }} 
-        modal 
-        onHide={() => setShowCreateEmp(false)}
-        className="admin-dialog"
-      >
-        <div className="dialog-content">
+      <Dialog open={showCreateEmp} onOpenChange={setShowCreateEmp}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Employee</DialogTitle>
+          </DialogHeader>
           <div className="form-grid">
             <div className="form-field">
-              <label className="field-label">Full Name *</label>
-              <InputText 
-                value={empForm.name} 
-                onChange={(e) => setEmpForm({ ...empForm, name: e.target.value })} 
+              <Label className="field-label">Full Name *</Label>
+              <Input
+                value={empForm.name}
+                onChange={(e) => setEmpForm({ ...empForm, name: e.target.value })}
                 placeholder="Enter full name"
                 className="w-full"
               />
             </div>
             
             <div className="form-field">
-              <label className="field-label">Email Address *</label>
-              <InputText 
-                value={empForm.email} 
-                onChange={(e) => setEmpForm({ ...empForm, email: e.target.value })} 
+              <Label className="field-label">Email Address *</Label>
+              <Input
+                value={empForm.email}
+                onChange={(e) => setEmpForm({ ...empForm, email: e.target.value })}
                 placeholder="Enter email address"
                 type="email"
                 className="w-full"
@@ -237,41 +271,43 @@ export default function AdminDashboard() {
             </div>
             
             <div className="form-field">
-              <label className="field-label">Role *</label>
-              <Dropdown 
-                value={empForm.role} 
-                options={roleOptions} 
-                onChange={(e) => setEmpForm({ ...empForm, role: e.target.value })} 
-                placeholder="Select role"
-                className="w-full"
-              />
+              <Label className="field-label">Role *</Label>
+              <select
+                value={empForm.role}
+                onChange={(e) => setEmpForm({ ...empForm, role: e.target.value })}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {roleOptions.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
             </div>
             
             <div className="form-field">
-              <label className="field-label">Department *</label>
-              <InputText 
-                value={empForm.department} 
-                onChange={(e) => setEmpForm({ ...empForm, department: e.target.value })} 
+              <Label className="field-label">Department *</Label>
+              <Input
+                value={empForm.department}
+                onChange={(e) => setEmpForm({ ...empForm, department: e.target.value })}
                 placeholder="Enter department"
                 className="w-full"
               />
             </div>
             
             <div className="form-field">
-              <label className="field-label">Phone</label>
-              <InputText 
-                value={empForm.phone} 
-                onChange={(e) => setEmpForm({ ...empForm, phone: e.target.value })} 
+              <Label className="field-label">Phone</Label>
+              <Input
+                value={empForm.phone}
+                onChange={(e) => setEmpForm({ ...empForm, phone: e.target.value })}
                 placeholder="Enter phone number"
                 className="w-full"
               />
             </div>
             
             <div className="form-field">
-              <label className="field-label">Salary</label>
-              <InputText 
-                value={empForm.salary} 
-                onChange={(e) => setEmpForm({ ...empForm, salary: parseFloat(e.target.value) || 0 })} 
+              <Label className="field-label">Salary</Label>
+              <Input
+                value={empForm.salary}
+                onChange={(e) => setEmpForm({ ...empForm, salary: parseFloat(e.target.value) || 0 })}
                 placeholder="Enter salary"
                 type="number"
                 className="w-full"
@@ -279,21 +315,20 @@ export default function AdminDashboard() {
             </div>
           </div>
           
-          <div className="form-actions">
-            <Button 
-              label="Cancel" 
-              icon="pi pi-times" 
-              onClick={() => setShowCreateEmp(false)} 
-              className="p-button-text"
-            />
-            <Button 
-              label="Create Employee" 
-              icon="pi pi-check" 
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowCreateEmp(false)}
+            >
+              Cancel
+            </Button>
+            <Button
               onClick={onCreateEmployee}
-              className="p-button-success"
-            />
-          </div>
-        </div>
+            >
+              Create Employee
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </>
   );

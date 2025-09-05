@@ -15,24 +15,42 @@ function AuthProviderImpl({ children }) {
 
   // On initial load, check localStorage for a valid session.
   useEffect(() => {
-    try {
-      const storedToken = localStorage.getItem('auth_token');
-      if (storedToken && !isTokenExpired(storedToken)) {
+    async function initializeAuth() {
+      try {
+        const storedToken = localStorage.getItem('auth_token');
         const storedUser = localStorage.getItem('auth_user');
-        if (storedUser) {
-          setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+        
+        if (storedToken && storedUser) {
+          // Check if token is expired
+          if (!isTokenExpired(storedToken)) {
+            try {
+              // Validate token with backend
+              const response = await apiRequestAuth('/me', storedToken);
+              if (response.ok) {
+                setToken(storedToken);
+                setUser(JSON.parse(storedUser));
+              } else {
+                // Token invalid, clear storage
+                clearAuthData();
+              }
+            } catch (error) {
+              console.error('Token validation failed:', error);
+              clearAuthData();
+            }
+          } else {
+            // Token expired, clear storage
+            clearAuthData();
+          }
         }
-      } else {
-        // If token is expired or doesn't exist, clear any lingering data
+      } catch (error) {
+        console.error("Failed to initialize auth state from storage:", error);
         clearAuthData();
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to initialize auth state from storage:", error);
-      clearAuthData();
-    } finally {
-      setLoading(false); // Stop loading after initial check
     }
+    
+    initializeAuth();
   }, []);
 
   // Sync token and user state with localStorage whenever they change.
@@ -178,6 +196,27 @@ function AuthProviderImpl({ children }) {
   const checkIn = useCallback((employeeId) => makeAuthenticatedRequest('/attendance/checkin', { method: 'POST', body: { employee_id: employeeId } }), [makeAuthenticatedRequest]);
   const checkOut = useCallback((employeeId) => makeAuthenticatedRequest('/attendance/checkout', { method: 'POST', body: { employee_id: employeeId } }), [makeAuthenticatedRequest]);
 
+  // Payslips
+  const generatePayslips = useCallback((month, employeeId) => {
+    return makeAuthenticatedRequest('/payslips/generate', {
+      method: 'POST',
+      body: employeeId ? { month, employee_id: employeeId } : { month },
+    }, { role: 'admin' });
+  }, [makeAuthenticatedRequest]);
+
+  const listPayslips = useCallback((params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return makeAuthenticatedRequest(`/payslips${q ? `?${q}` : ''}`);
+  }, [makeAuthenticatedRequest]);
+
+  const updatePayslipStatus = useCallback((payslipId, status) => {
+    return makeAuthenticatedRequest(`/payslips/${payslipId}`, { method: 'PATCH', body: { status } }, { role: 'admin' });
+  }, [makeAuthenticatedRequest]);
+
+  const exportPayslipCsvUrl = useCallback((payslipId) => {
+    return `${API_BASE_URL}/payslips/${payslipId}/export?format=csv`;
+  }, []);
+
   const changePassword = useCallback((currentPassword, newPassword) => {
     return makeAuthenticatedRequest('/me/change-password', {
       method: 'POST',
@@ -185,10 +224,10 @@ function AuthProviderImpl({ children }) {
     });
   }, [makeAuthenticatedRequest]);
   
-  const resetPassword = useCallback((employeeId, newPassword) => {
+  const resetPassword = useCallback((email, newPassword) => {
     return makeAuthenticatedRequest('/admin/reset-password', {
       method: 'POST',
-      body: { employee_id: employeeId, new_password: newPassword },
+      body: { email, new_password: newPassword },
     }, { role: 'admin' });
   }, [makeAuthenticatedRequest]);
 
@@ -213,10 +252,16 @@ function AuthProviderImpl({ children }) {
     checkOut,
     changePassword,
     resetPassword,
+    // Payslips
+    generatePayslips,
+    listPayslips,
+    updatePayslipStatus,
+    exportPayslipCsvUrl,
   }), [
     token, user, loading, login, logout, getEmployees, getEmployeeById, 
     getAttendanceByEmployee, getUserProfile, getAdminSummary, createEmployee, 
-    updateEmployee, deleteEmployee, checkIn, checkOut, changePassword, resetPassword
+    updateEmployee, deleteEmployee, checkIn, checkOut, changePassword, resetPassword,
+    generatePayslips, listPayslips, updatePayslipStatus, exportPayslipCsvUrl
   ]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

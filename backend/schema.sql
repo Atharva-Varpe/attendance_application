@@ -90,3 +90,12 @@ CREATE TABLE payslips (
     generated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE CASCADE
 );
+
+-- Indexes for performance
+CREATE INDEX idx_employees_email ON employees(email);
+CREATE INDEX idx_employees_role ON employees(role);
+CREATE INDEX idx_employees_is_active ON employees(is_active);
+CREATE INDEX idx_attendance_employee_date ON attendance_records(employee_id, attendance_date);
+CREATE INDEX idx_attendance_date ON attendance_records(attendance_date);
+CREATE INDEX idx_payslips_employee ON payslips(employee_id);
+CREATE INDEX idx_payslips_period ON payslips(pay_period_start, pay_period_end);
