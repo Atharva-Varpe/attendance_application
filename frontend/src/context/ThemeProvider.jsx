@@ -27,4 +27,13 @@ export function useThemeMode() {
   return React.useContext(ThemeContext)
 }
 
+// Backward-compatible hook used by App.jsx
+export function useTheme() {
+  const { mode, toggle } = React.useContext(ThemeContext)
+  return {
+    theme: mode,
+    toggleTheme: toggle,
+  }
+}
+
 
