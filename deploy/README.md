@@ -13,44 +13,31 @@ cd deploy
 ./publish.sh
 ```
 
-## Installation (Using Docker Hub)
-1. Create docker-compose.yml with:
-```yaml
-version: '3.8'
-
-services:
-  frontend:
-    image: yourusername/attendance-frontend:latest
-    ports: ["80:80"]
-    networks: ["app-network"]
-
-  backend:
-    image: yourusername/attendance-backend:latest
-    ports: ["5000:5000"]
-    volumes: ["backend-data:/data"]
-    environment:
-      - SECRET_KEY=your-production-secret
-    networks: ["app-network"]
-
-volumes:
-  backend-data:
-
-networks:
-  app-network:
-    driver: bridge
-```
-2. Run deployment:
+## Running Locally (docker-compose)
+1. Copy `.env.example` to `.env` and edit as needed:
 ```bash
-# Make setup script executable
-chmod +x deploy/setup.sh
-
-# Start the containers
-./deploy/setup.sh
+cp .env.example .env
+# Set SECRET_KEY (any random string) and optionally FREEDNS_UPDATE_URL
 ```
+2. Start the stack:
+```bash
+docker-compose up -d
+```
+3. Verify healthchecks:
+```bash
+docker-compose ps
+curl -s http://localhost:5000/healthz | jq .
+curl -sI http://localhost/ | head -n1
+```
+
+Notes:
+- The `ddns` service updates FreeDNS periodically if `FREEDNS_UPDATE_URL` is set in `.env`.
+- `backend` persists SQLite data in the `backend-data` volume at `/data/employee.db`.
 
 ## Accessing the Application
 - Web interface: http://<machine-ip>:80
-- API endpoints: http://<machine-ip>:5000/api
+- API base: http://<machine-ip>:5000
+- Health endpoint: GET http://<machine-ip>:5000/healthz (used by compose healthcheck)
 
 ### Default credentials
 - Admin: `admin@example.com` / `admin123`
@@ -68,15 +55,29 @@ docker-compose ps
 
 2. Test API health:
 ```bash
-curl http://localhost:5000/api/me
+curl http://localhost:5000/healthz
 ```
 
-3. Check frontend logs:
+3. Check frontend:
 ```bash
-docker-compose logs frontend
+curl -I http://localhost/
+docker-compose logs frontend --tail=100
 ```
 
 ## Packaging for Distribution
 ```bash
 # Create deployment archive
 tar czvf attendance-system.tar.gz docker-compose.yml frontend/ backend/ deploy/
+```
+
+## Developer Tooling
+
+### Pre-commit hooks
+Install pre-commit and enable hooks for Python (black, ruff, isort) and frontend (prettier):
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+### GitHub Actions CI
+CI runs on push/PR to main. It lints the backend with black/ruff/isort, builds the frontend, and builds Docker images.
