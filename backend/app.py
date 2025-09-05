@@ -4,6 +4,8 @@ from flask import Flask, request, jsonify, send_from_directory
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from datetime import datetime
 import hashlib
+from freedns_updater import get_freedns_updater, update_freedns_now
+from freedns_scheduler import start_scheduler, stop_scheduler, get_scheduler
 
 # --- App and Database Configuration ---
 
@@ -12,13 +14,25 @@ app = Flask(__name__, static_folder='../static')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
 token_serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
-# Simple CORS handler
+# Enhanced CORS handler for REST API
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
+
+# Handle preflight OPTIONS requests
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        response = jsonify()
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
 # Define base dir and absolute paths for SQLite database and schema
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Prefer DATABASE path from environment, fallback to local file
@@ -91,6 +105,27 @@ def ensure_schema():
 # Ensure DB file and schema are present at startup
 ensure_schema()
 
+# Initialize FreeDNS updater and perform initial update
+try:
+    logger.info("Initializing FreeDNS updater...")
+    updater = get_freedns_updater()
+    if updater:
+        # Perform initial DNS update on startup
+        success = updater.update_dns(force=True)
+        if success:
+            logger.info("Initial FreeDNS update completed successfully")
+        else:
+            logger.warning("Initial FreeDNS update failed")
+    else:
+        logger.info("FreeDNS updater not configured")
+    
+    # Start the background scheduler for periodic updates
+    start_scheduler()
+    logger.info("FreeDNS background scheduler started")
+    
+except Exception as e:
+    logger.error(f"Error initializing FreeDNS updater: {e}")
+
 # --- Static File Routes ---
 
 @app.route('/')
@@ -98,7 +133,7 @@ def serve_index():
     """Serve the main HTML page."""
     return send_from_directory(app.static_folder, 'index.html')
 
-@app.route('/healthz', methods=['GET'])
+@app.route('/api/healthz', methods=['GET'])
 def healthz():
     """Simple health check that verifies DB connectivity and returns 200 if healthy."""
     try:
@@ -117,6 +152,18 @@ def healthz():
         except Exception:
             pass
         return jsonify({'status': 'error', 'message': str(exc)}), 500
+
+@app.route('/api/time', methods=['GET'])
+def get_server_time():
+    """Get server time for frontend synchronization."""
+    from datetime import timezone
+    now = datetime.now(timezone.utc).astimezone()
+    return jsonify({
+        "iso": now.isoformat(),
+        "epochMs": int(now.timestamp() * 1000),
+        "timezone": str(now.tzinfo),
+        "offsetMinutes": int(now.utcoffset().total_seconds() // 60) if now.utcoffset() else 0,
+    })
 
 @app.route('/<path:filename>')
 def serve_static(filename):
@@ -184,6 +231,7 @@ def login():
     return jsonify({
         'token': token,
         'user': {
+            'employeeId': user['employee_id'],
             'employee_id': user['employee_id'],
             'email': user['email'],
             'name': user['full_name'],
@@ -451,13 +499,22 @@ def get_me():
     user = getattr(request, 'user', {})
     conn = get_db_connection()
     row = conn.execute(
-        "SELECT employee_id, full_name, email, role FROM employees WHERE employee_id = ?",
+        "SELECT employee_id, full_name, email, role, phone_number, department, date_of_joining, is_active FROM employees WHERE employee_id = ?",
         (user.get('employee_id'),)
     ).fetchone()
     conn.close()
     if not row:
         return jsonify({'error': 'User not found'}), 404
-    return jsonify(dict(row))
+    
+    profile_data = dict(row)
+    # Add camelCase keys for frontend compatibility
+    profile_data['employeeId'] = profile_data['employee_id']
+    profile_data['fullName'] = profile_data['full_name']
+    profile_data['phoneNumber'] = profile_data['phone_number']
+    profile_data['dateOfJoining'] = profile_data['date_of_joining']
+    profile_data['isActive'] = profile_data['is_active']
+    
+    return jsonify(profile_data)
 
 @app.route('/api/me', methods=['PATCH'])
 @require_auth
@@ -470,10 +527,22 @@ def update_me():
     data = request.get_json() or {}
     fields, values = [], []
 
+    # Handle both camelCase and snake_case field names for frontend compatibility
     if 'full_name' in data and data['full_name']:
         fields.append("full_name = ?"); values.append(data['full_name'])
+    elif 'fullName' in data and data['fullName']:
+        fields.append("full_name = ?"); values.append(data['fullName'])
+        
     if 'email' in data and data['email']:
         fields.append("email = ?"); values.append(data['email'])
+        
+    if 'phone_number' in data and data['phone_number']:
+        fields.append("phone_number = ?"); values.append(data['phone_number'])
+    elif 'phoneNumber' in data and data['phoneNumber']:
+        fields.append("phone_number = ?"); values.append(data['phoneNumber'])
+        
+    if 'department' in data and data['department']:
+        fields.append("department = ?"); values.append(data['department'])
 
     if not fields:
         return jsonify({'error': 'No valid fields provided'}), 400
@@ -566,6 +635,77 @@ def admin_summary():
         'todayAttendanceCount': today_attendance,
         'lateCount': late_count
     })
+
+
+# --- FreeDNS API Endpoints ---
+
+@app.route('/api/freedns/status', methods=['GET'])
+@admin_required
+def freedns_status():
+    """Get FreeDNS updater status."""
+    updater = get_freedns_updater()
+    if not updater:
+        return jsonify({'error': 'FreeDNS not configured'}), 404
+    
+    status = updater.get_status()
+    return jsonify(status)
+
+@app.route('/api/freedns/update', methods=['POST'])
+@admin_required
+def freedns_update():
+    """Manually trigger FreeDNS update."""
+    data = request.get_json() or {}
+    force = data.get('force', False)
+    
+    success = update_freedns_now(force=force)
+    
+    if success:
+        updater = get_freedns_updater()
+        status = updater.get_status() if updater else {}
+        return jsonify({
+            'message': 'FreeDNS update successful',
+            'status': status
+        })
+    else:
+        return jsonify({'error': 'FreeDNS update failed'}), 500
+
+@app.route('/api/freedns/ip', methods=['GET'])
+@require_auth
+def get_current_ip():
+    """Get current public IP address."""
+    updater = get_freedns_updater()
+    if not updater:
+        return jsonify({'error': 'FreeDNS not configured'}), 404
+    
+    current_ip = updater.get_current_ip()
+    if current_ip:
+        return jsonify({'ip': current_ip})
+    else:
+        return jsonify({'error': 'Unable to determine current IP'}), 500
+
+@app.route('/api/freedns/scheduler', methods=['GET'])
+@admin_required
+def freedns_scheduler_status():
+    """Get FreeDNS scheduler status."""
+    scheduler = get_scheduler()
+    status = scheduler.get_status()
+    return jsonify(status)
+
+@app.route('/api/freedns/scheduler/start', methods=['POST'])
+@admin_required
+def start_freedns_scheduler():
+    """Start the FreeDNS scheduler."""
+    scheduler = get_scheduler()
+    scheduler.start()
+    return jsonify({'message': 'FreeDNS scheduler started'})
+
+@app.route('/api/freedns/scheduler/stop', methods=['POST'])
+@admin_required
+def stop_freedns_scheduler():
+    """Stop the FreeDNS scheduler."""
+    scheduler = get_scheduler()
+    scheduler.stop()
+    return jsonify({'message': 'FreeDNS scheduler stopped'})
 
 
 # --- Main execution ---

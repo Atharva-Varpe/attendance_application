@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { API_BASE_URL, apiRequest, apiRequestAuth, isTokenExpired, clearAuthData } from '../lib/api.js';
 import { AuthContext } from './AuthContext.js';
+import { apiService } from '../services/apiService.js';
 
 /**
  * Provides authentication state and API methods to the entire application.
@@ -140,10 +141,7 @@ function AuthProviderImpl({ children }) {
   const login = useCallback(async (email, password) => {
     setLoading(true);
     try {
-      const response = await apiRequest('/login', {
-        method: 'POST',
-        body: { email: email.toLowerCase(), password },
-      });
+      const response = await apiService.login(email, password);
       
       if (!response.ok) {
         throw new Error(response.error || 'Login failed');

@@ -1,5 +1,57 @@
 # Attendance System Deployment Guide
 
+This directory contains deployment scripts and configurations for the attendance application.
+
+## Domain Routing Solutions
+
+### GOOD: Current Setup (Quick Fix)
+Your current Docker Compose setup should work! If your domain isn't routing to the frontend:
+
+1. **Check firewall**: `sudo ufw allow 80 && sudo ufw allow 443`
+2. **Verify containers**: `docker-compose ps`
+3. **Test locally**: `curl -I http://localhost`
+4. **Check DNS**: `nslookup your-domain.com`
+
+### BETTER: Enhanced Production Setup
+Use the production Docker Compose configuration:
+
+```bash
+# Deploy with enhanced configuration
+docker-compose -f docker-compose.production.yml up -d
+
+# Monitor logs
+docker-compose -f docker-compose.production.yml logs -f nginx
+```
+
+Features:
+- Dedicated Nginx reverse proxy
+- Rate limiting and security headers
+- Automatic database backups
+- Health checks and monitoring
+- Load balancing ready
+
+### BEST: Production with SSL
+Full production deployment with HTTPS:
+
+```bash
+# 1. Setup SSL certificates
+./scripts/ssl-setup.sh your-domain.com your-email@domain.com
+
+# 2. Deploy with SSL configuration
+docker-compose -f docker-compose.production.yml up -d
+
+# 3. Update nginx to use SSL config
+docker-compose exec nginx cp /etc/nginx/ssl-nginx.conf /etc/nginx/conf.d/default.conf
+docker-compose exec nginx nginx -s reload
+```
+
+Features:
+- HTTPS with Let's Encrypt or self-signed certificates
+- HTTP/2 support
+- Advanced security headers
+- Automatic certificate renewal
+- Production-grade performance optimizations
+
 ## Requirements
 - Docker 20.10+
 - docker-compose 1.29+

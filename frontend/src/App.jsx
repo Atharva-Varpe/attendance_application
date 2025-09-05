@@ -14,6 +14,9 @@ import { useAuth } from './context/useAuth';
 import SessionManager from './components/SessionManager';
 import { AppSidebar } from './components/app-sidebar';
 import { ThemeProvider, useTheme } from './context/ThemeProvider';
+import { apiService } from './services/apiService';
+import ErrorBoundary from './components/ErrorBoundary';
+import { LoadingSpinner } from './components/LoadingSpinner';
 
 // Lazy load pages
 const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
@@ -29,27 +32,38 @@ function SalaryPage() {
   const [employee, setEmployee] = React.useState(null);
   const [payslips, setPayslips] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
 
   React.useEffect(() => {
     async function loadData() {
-      if (!user?.employeeId) return;
+      if (!user?.employeeId) {
+        setLoading(false);
+        return;
+      }
+      
+      setLoading(true);
+      setError(null);
+      
       try {
-        const empRes = await fetch(`/api/employees/${user.employeeId}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        if (empRes.ok) {
-          const empData = await empRes.json();
-          setEmployee(empData);
+        // Use API service for employee data
+        const empResponse = await apiService.getEmployee(user.employeeId);
+        if (empResponse.ok) {
+          setEmployee(empResponse.data);
+        } else {
+          throw new Error(empResponse.error || 'Failed to load employee data');
         }
-        const payslipRes = await fetch(`/api/payslips?employee_id=${user.employeeId}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        if (payslipRes.ok) {
-          const payslipData = await payslipRes.json();
-          setPayslips(payslipData);
+
+        // Use API service for payslips
+        const payslipResponse = await apiService.getPayslips({ employee_id: user.employeeId });
+        if (payslipResponse.ok) {
+          setPayslips(payslipResponse.data || []);
+        } else {
+          console.warn('Failed to load payslips:', payslipResponse.error);
+          setPayslips([]);
         }
       } catch (error) {
         console.error('Error loading salary data:', error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -78,6 +92,24 @@ function SalaryPage() {
           <Skeleton className="h-[120px]" />
         </div>
         <Skeleton className="h-[300px]" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-destructive">Error Loading Data</h3>
+          <p className="text-sm text-muted-foreground">{error}</p>
+          <Button 
+            variant="outline" 
+            className="mt-4" 
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }
@@ -185,7 +217,9 @@ function ProfilePage() {
   const { user } = useAuth();
   const [employee, setEmployee] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
   const [editing, setEditing] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
   const [form, setForm] = React.useState({
     name: '',
     email: '',
@@ -206,22 +240,26 @@ function ProfilePage() {
         return;
       }
 
+      setLoading(true);
+      setError(null);
+
       try {
-        const response = await fetch(`/api/employees/${user.employeeId}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
+        const response = await apiService.getEmployee(user.employeeId);
         if (response.ok) {
-          const empData = await response.json();
+          const empData = response.data;
           setEmployee(empData);
           setForm({
-            name: empData.full_name || '',
+            name: empData.full_name || empData.fullName || '',
             email: empData.email || '',
             department: empData.department || '',
-            phone: empData.phone_number || ''
+            phone: empData.phone_number || empData.phoneNumber || ''
           });
+        } else {
+          throw new Error(response.error || 'Failed to load profile');
         }
       } catch (error) {
         console.error('Error loading profile:', error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -230,36 +268,41 @@ function ProfilePage() {
   }, [user]);
 
   const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    
     try {
-      const response = await fetch(`/api/me`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          full_name: form.name,
-          email: form.email,
-          phone_number: form.phone,
-          department: form.department
-        })
+      const response = await apiService.updateProfile({
+        fullName: form.name,
+        email: form.email,
+        phoneNumber: form.phone,
+        department: form.department
       });
 
       if (response.ok) {
         setEditing(false);
         // Reload profile data
         if (user?.employeeId) {
-          const empResponse = await fetch(`/api/employees/${user.employeeId}`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-          });
+          const empResponse = await apiService.getEmployee(user.employeeId);
           if (empResponse.ok) {
-            const empData = await empResponse.json();
+            const empData = empResponse.data;
             setEmployee(empData);
+            setForm({
+              name: empData.full_name || empData.fullName || '',
+              email: empData.email || '',
+              department: empData.department || '',
+              phone: empData.phone_number || empData.phoneNumber || ''
+            });
           }
         }
+      } else {
+        throw new Error(response.error || 'Failed to update profile');
       }
     } catch (error) {
       console.error('Error saving profile:', error);
+      setError(error.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -272,6 +315,24 @@ function ProfilePage() {
         <div className="grid gap-4 md:grid-cols-2">
           <Skeleton className="h-[400px]" />
           <Skeleton className="h-[400px]" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-destructive">Error Loading Profile</h3>
+          <p className="text-sm text-muted-foreground">{error}</p>
+          <Button 
+            variant="outline" 
+            className="mt-4" 
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </Button>
         </div>
       </div>
     );
@@ -342,19 +403,32 @@ function ProfilePage() {
             {isSelf && (
               <div className="flex gap-2 pt-4">
                 {!editing ? (
-                  <Button onClick={() => setEditing(true)}>
+                  <Button onClick={() => setEditing(true)} disabled={saving}>
                     Edit Profile
                   </Button>
                 ) : (
                   <>
-                    <Button onClick={handleSave}>
-                      Save Changes
+                    <Button onClick={handleSave} disabled={saving}>
+                      {saving ? 'Saving...' : 'Save Changes'}
                     </Button>
-                    <Button variant="outline" onClick={() => setEditing(false)}>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setEditing(false);
+                        setError(null);
+                      }}
+                      disabled={saving}
+                    >
                       Cancel
                     </Button>
                   </>
                 )}
+              </div>
+            )}
+            
+            {error && (
+              <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
           </CardContent>
@@ -482,23 +556,32 @@ function Layout() {
           </div>
         </header>
         <main className="flex-1 overflow-auto p-4">
-          <Suspense fallback={<div className="text-foreground">Loading...</div>}>
-            <Routes location={location}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/attendance" element={<AttendancePage />} />
-              <Route path="/salary" element={<SalaryPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              {user?.role?.toLowerCase() === 'admin' && (
-                <>
-                  <Route path="/employees" element={<EmployeesPage />} />
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/payslips" element={<PayslipsPage />} />
-                </>
-              )}
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center space-y-4">
+                  <LoadingSpinner size="lg" className="mx-auto" />
+                  <p className="text-muted-foreground">Loading page...</p>
+                </div>
+              </div>
+            }>
+              <Routes location={location}>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/attendance" element={<AttendancePage />} />
+                <Route path="/salary" element={<SalaryPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                {user?.role?.toLowerCase() === 'admin' && (
+                  <>
+                    <Route path="/employees" element={<EmployeesPage />} />
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/payslips" element={<PayslipsPage />} />
+                  </>
+                )}
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
         </main>
       </SidebarInset>
     </SidebarProvider>

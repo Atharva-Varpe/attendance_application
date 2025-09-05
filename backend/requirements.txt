@@ -3,3 +3,6 @@ uvicorn[standard]
 python-jose[cryptography]
 python-multipart
 pytest
+requests
+flask
+itsdangerous
