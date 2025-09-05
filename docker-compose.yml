@@ -42,7 +42,7 @@ services:
   ddns:
     image: curlimages/curl:8.8.0
     env_file: .env
-    command: ["sh", "-c", ": ${FREEDNS_UPDATE_INTERVAL:=300}; while true; do if [ -n \"$FREEDNS_UPDATE_URL\" ]; then echo \"[DDNS] Updating at $(date -u)\"; curl -fsS --max-time 20 \"$FREEDNS_UPDATE_URL\" || echo \"[DDNS] update failed\"; else echo '[DDNS] FREEDNS_UPDATE_URL not set'; fi; sleep $FREEDNS_UPDATE_INTERVAL; done"]
+    command: ["sh", "-c", ": $${FREEDNS_UPDATE_INTERVAL:=300}; while true; do if [ -n \"$$FREEDNS_UPDATE_URL\" ]; then echo \"[DDNS] Updating at $$(date -u)\"; curl -fsS --max-time 20 \"$$FREEDNS_UPDATE_URL\" || echo \"[DDNS] update failed\"; else echo '[DDNS] FREEDNS_UPDATE_URL not set'; fi; sleep $$FREEDNS_UPDATE_INTERVAL; done"]
     restart: unless-stopped
     networks:
       - app-network
