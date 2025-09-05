@@ -9,6 +9,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from jose import jwt, JWTError
 from fastapi.responses import StreamingResponse
+from backend.app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_HOURS, ALLOWED_ORIGINS
+from backend.app.db import get_db_connection, init_db_if_needed
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -17,18 +19,10 @@ logger = logging.getLogger(__name__)
 
 # --- App and Database Configuration ---
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_HOURS = 8
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE_PATH = os.environ.get("DATABASE", os.path.join(BASE_DIR, "employee.db"))
-SCHEMA_PATH = os.path.join(BASE_DIR, "schema.sql")
-
 app = FastAPI(title="Attendance Backend", version="1.0.0")
 
 # CORS - restrict to specific origins for security
-allowed_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:80,http://localhost:3000").split(",")
+allowed_origins = ALLOWED_ORIGINS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
@@ -36,38 +30,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-def get_db_connection() -> sqlite3.Connection:
-    conn = sqlite3.connect(DATABASE_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
-def init_db_if_needed() -> None:
-    need_init = False
-    if not os.path.exists(DATABASE_PATH):
-        need_init = True
-    else:
-        try:
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='employees';")
-            row = cur.fetchone()
-            conn.close()
-            if not row:
-                need_init = True
-        except sqlite3.Error:
-            need_init = True
-
-    if need_init:
-        conn = get_db_connection()
-        with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
-            sql_script = f.read()
-        cur = conn.cursor()
-        cur.executescript(sql_script)
-        conn.commit()
-        conn.close()
+ 
 
 
 init_db_if_needed()
@@ -115,6 +78,23 @@ def admin_required(user: Dict[str, Any] = Depends(require_auth)) -> Dict[str, An
 
 
 # --- Auth API Endpoints ---
+
+@app.get("/healthz")
+def healthz():
+    """Liveness/readiness probe. Verifies DB connectivity."""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT 1")
+        cur.fetchone()
+        conn.close()
+        return {"status": "ok", "database": "ok"}
+    except Exception as exc:
+        try:
+            conn.close()
+        except Exception:
+            pass
+        raise HTTPException(status_code=500, detail=f"healthcheck failed: {exc}")
 
 @app.post("/api/login")
 def login(body: Dict[str, Any]):

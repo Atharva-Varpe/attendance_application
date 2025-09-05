@@ -21,7 +21,8 @@ def after_request(response):
     return response
 # Define base dir and absolute paths for SQLite database and schema
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE = os.path.join(BASE_DIR, 'employee.db')
+# Prefer DATABASE path from environment, fallback to local file
+DATABASE = os.environ.get('DATABASE', os.path.join(BASE_DIR, 'employee.db'))
 SCHEMA_PATH = os.path.join(BASE_DIR, 'schema.sql')
 
 import logging
@@ -96,6 +97,26 @@ ensure_schema()
 def serve_index():
     """Serve the main HTML page."""
     return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/healthz', methods=['GET'])
+def healthz():
+    """Simple health check that verifies DB connectivity and returns 200 if healthy."""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT 1")
+        cur.fetchone()
+        conn.close()
+        return jsonify({
+            'status': 'ok',
+            'database': 'ok',
+        }), 200
+    except Exception as exc:
+        try:
+            conn.close()
+        except Exception:
+            pass
+        return jsonify({'status': 'error', 'message': str(exc)}), 500
 
 @app.route('/<path:filename>')
 def serve_static(filename):
