@@ -32,6 +32,7 @@ export function Login02({ onSubmit, email, setEmail, password, setPassword, load
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="username"
                 required
               />
             </div>
@@ -43,6 +44,7 @@ export function Login02({ onSubmit, email, setEmail, password, setPassword, load
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
                 required
               />
             </div>
@@ -55,12 +57,7 @@ export function Login02({ onSubmit, email, setEmail, password, setPassword, load
               {loading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
-          <div className="text-center text-sm text-muted-foreground">
-            <div className="space-y-1">
-              <div><strong>Demo:</strong> admin@example.com / admin123</div>
-              <div><strong>Gate:</strong> gate@example.com / gate123</div>
-            </div>
-          </div>
+          {/* Production: remove demo credential hints */}
         </CardContent>
       </Card>
     </div>
