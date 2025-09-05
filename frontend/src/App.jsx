@@ -9,7 +9,7 @@ import { Badge } from './components/ui/badge';
 import { Skeleton } from './components/ui/skeleton';
 import { LogOut, User, Moon, Sun } from 'lucide-react';
 
-import AuthProvider from './context/AuthContext';
+import AuthProvider from './context/AuthContext.jsx';
 import { useAuth } from './context/useAuth';
 import SessionManager from './components/SessionManager';
 import { AppSidebar } from './components/app-sidebar';

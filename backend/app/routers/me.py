@@ -1,8 +1,8 @@
 from typing import Dict, Any, List
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.app.db import get_db_connection
-from backend.app.security import require_auth
+from app.db import get_db_connection
+from app.security import require_auth
 
 router = APIRouter(prefix="/api", tags=["me"])
 

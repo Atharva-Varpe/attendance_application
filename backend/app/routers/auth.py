@@ -3,8 +3,8 @@ from fastapi import APIRouter, HTTPException
 import re
 import hashlib
 
-from backend.app.db import get_db_connection
-from backend.app.security import create_access_token
+from app.db import get_db_connection
+from app.security import create_access_token
 
 router = APIRouter(prefix="/api", tags=["auth"])
 

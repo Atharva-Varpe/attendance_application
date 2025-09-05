@@ -8,15 +8,15 @@ from fastapi import FastAPI, Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
-from backend.app.routers import auth as auth_router
-from backend.app.routers import me as me_router
-from backend.app.routers import employees as employees_router
-from backend.app.routers import attendance as attendance_router
-from backend.app.routers import payslips as payslips_router
-from backend.app.routers import admin as admin_router
-from backend.app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_HOURS, ALLOWED_ORIGINS
-from backend.app.db import get_db_connection, init_db_if_needed
-from backend.app.security import require_auth, admin_required
+from app.routers import auth as auth_router
+from app.routers import me as me_router
+from app.routers import employees as employees_router
+from app.routers import attendance as attendance_router
+from app.routers import payslips as payslips_router
+from app.routers import admin as admin_router
+from app.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_HOURS, ALLOWED_ORIGINS
+from app.db import get_db_connection, init_db_if_needed
+from app.security import require_auth, admin_required
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

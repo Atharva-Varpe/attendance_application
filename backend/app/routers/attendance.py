@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from datetime import datetime
 
-from backend.app.db import get_db_connection
-from backend.app.security import require_auth
+from app.db import get_db_connection
+from app.security import require_auth, admin_required
 
 router = APIRouter(prefix="/api", tags=["attendance"])
 

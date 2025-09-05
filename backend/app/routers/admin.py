@@ -3,8 +3,8 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 import hashlib
 
-from backend.app.db import get_db_connection
-from backend.app.security import admin_required
+from app.db import get_db_connection
+from app.security import admin_required
 
 router = APIRouter(prefix="/api", tags=["admin"])
 
